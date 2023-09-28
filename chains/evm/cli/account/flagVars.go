@@ -3,12 +3,12 @@ package account
 import (
 	"math/big"
 
-	"github.com/ChainSafe/chainbridge-core/crypto/secp256k1"
+	"github.com/ChainSafe/sygma-core/crypto/secp256k1"
 
 	"github.com/ethereum/go-ethereum/common"
 )
 
-//flag vars
+// flag vars
 var (
 	PrivateKey string
 	Pass       string
@@ -17,7 +17,7 @@ var (
 	Decimals   uint64
 )
 
-//processed flag vars
+// processed flag vars
 var (
 	RecipientAddress common.Address
 	WeiAmount        *big.Int

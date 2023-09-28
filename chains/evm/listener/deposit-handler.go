@@ -4,8 +4,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ChainSafe/chainbridge-core/relayer/message"
-	"github.com/ChainSafe/chainbridge-core/types"
+	"github.com/ChainSafe/sygma-core/relayer/message"
+	"github.com/ChainSafe/sygma-core/types"
 	"github.com/rs/zerolog/log"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -80,7 +80,7 @@ func Erc20DepositHandler(sourceID, destId uint8, nonce uint64, resourceID types.
 	// lenRecipientAddress: second 32 bytes of calldata [32:64]
 	// does not need to be derived because it is being calculated
 	// within ERC20MessageHandler
-	// https://github.com/ChainSafe/chainbridge-core/blob/main/chains/evm/voter/message-handler.go#L108
+	// https://github.com/ChainSafe/sygma-core/blob/main/chains/evm/voter/message-handler.go#L108
 
 	// 32-64 is recipient address length
 	recipientAddressLength := big.NewInt(0).SetBytes(calldata[32:64])

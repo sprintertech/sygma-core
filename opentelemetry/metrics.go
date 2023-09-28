@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ChainSafe/chainbridge-core/relayer/message"
+	"github.com/ChainSafe/sygma-core/relayer/message"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/metric"

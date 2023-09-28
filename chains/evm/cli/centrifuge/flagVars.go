@@ -3,17 +3,17 @@ package centrifuge
 import (
 	"math/big"
 
-	"github.com/ChainSafe/chainbridge-core/crypto/secp256k1"
+	"github.com/ChainSafe/sygma-core/crypto/secp256k1"
 	"github.com/ethereum/go-ethereum/common"
 )
 
-//flag vars
+// flag vars
 var (
 	Hash    string
 	Address string
 )
 
-//processed flag vars
+// processed flag vars
 var (
 	StoreAddr common.Address
 	ByteHash  [32]byte

@@ -8,8 +8,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ChainSafe/chainbridge-core/relayer/message"
-	"github.com/ChainSafe/chainbridge-core/store"
+	"github.com/ChainSafe/sygma-core/relayer/message"
+	"github.com/ChainSafe/sygma-core/store"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/ChainSafe/chainbridge-core/chains/evm/calls/contracts/forwarder"
-	"github.com/ChainSafe/chainbridge-core/chains/evm/calls/transactor"
+	"github.com/ChainSafe/sygma-core/chains/evm/calls/contracts/forwarder"
+	"github.com/ChainSafe/sygma-core/chains/evm/calls/transactor"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ChainSafe/chainbridge-core/chains/evm/calls/evmclient"
+	"github.com/ChainSafe/sygma-core/chains/evm/calls/evmclient"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"

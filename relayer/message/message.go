@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"strconv"
 
-	"github.com/ChainSafe/chainbridge-core/types"
+	"github.com/ChainSafe/sygma-core/types"
 )
 
 type TransferType string
