@@ -63,12 +63,7 @@ func (r *Relayer) route(msgs []*message.Message) {
 		return
 	}
 
-	for _, m := range msgs {
-		r.metrics.TrackDepositMessage(m)
-	}
-
 	log.Debug().Msgf("Sending messages %+v to destination %v", msgs, destChain.DomainID())
-
 	err := destChain.Write(msgs)
 	if err != nil {
 		for _, m := range msgs {

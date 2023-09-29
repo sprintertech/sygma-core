@@ -21,11 +21,3 @@ type GasPricerOpts struct {
 	GasPriceFactor      *big.Float    // GasPriceFactor In static gasPricer multiplies final gasPrice. Could be for example 0.75 or 5.
 	Args                []interface{} // Args is the array of dynamic typed args that could be used for other custom GasPricer implementations
 }
-
-func multiplyGasPrice(gasEstimate *big.Int, gasMultiplier *big.Float) *big.Int {
-	gasEstimateFloat := new(big.Float).SetInt(gasEstimate)
-	result := gasEstimateFloat.Mul(gasEstimateFloat, gasMultiplier)
-	gasPrice := new(big.Int)
-	result.Int(gasPrice)
-	return gasPrice
-}

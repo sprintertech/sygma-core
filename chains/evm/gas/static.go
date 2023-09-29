@@ -51,3 +51,11 @@ func (gasPricer *StaticGasPriceDeterminant) GasPrice(priority *uint8) ([]*big.In
 	gasPrices[0] = gp
 	return gasPrices, nil
 }
+
+func multiplyGasPrice(gasEstimate *big.Int, gasMultiplier *big.Float) *big.Int {
+	gasEstimateFloat := new(big.Float).SetInt(gasEstimate)
+	result := gasEstimateFloat.Mul(gasEstimateFloat, gasMultiplier)
+	gasPrice := new(big.Int)
+	result.Int(gasPrice)
+	return gasPrice
+}
