@@ -4,7 +4,6 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/calls/evmtransaction"
 	mock_calls "github.com/ChainSafe/sygma-core/chains/evm/calls/mock"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/transactor"
 	mock_transactor "github.com/ChainSafe/sygma-core/chains/evm/calls/transactor/mock"
@@ -43,11 +42,11 @@ func (s *TransactorTestSuite) TestTransactor_SignAndSend_Success() {
 	s.mockContractCallerDispatcherClient.EXPECT().UnsafeNonce().Return(big.NewInt(1), nil)
 	s.mockGasPricer.EXPECT().GasPrice(gomock.Any()).Return([]*big.Int{big.NewInt(1)}, nil)
 	s.mockContractCallerDispatcherClient.EXPECT().SignAndSendTransaction(gomock.Any(), gomock.Any()).Return(common.Hash{1, 2, 3, 4, 5}, nil)
-	s.mockContractCallerDispatcherClient.EXPECT().WaitAndReturnTxReceipt(gomock.Any()).Return(&types.Receipt{}, nil)
+	s.mockContractCallerDispatcherClient.EXPECT().TxReceipt(gomock.Any()).Return(&types.Receipt{}, nil)
 	s.mockContractCallerDispatcherClient.EXPECT().UnsafeIncreaseNonce().Return(nil)
 	s.mockContractCallerDispatcherClient.EXPECT().UnlockNonce()
 
-	txFabric := evmtransaction.NewTransaction
+	txFabric := transactionNewTransaction
 	var trans = signAndSend.NewSignAndSendTransactor(
 		txFabric,
 		s.mockGasPricer,

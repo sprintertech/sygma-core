@@ -1,4 +1,4 @@
-package evmgaspricer
+package gaspricer
 
 import (
 	"context"

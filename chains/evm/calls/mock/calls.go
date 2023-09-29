@@ -9,7 +9,7 @@ import (
 	big "math/big"
 	reflect "reflect"
 
-	evmclient "github.com/ChainSafe/sygma-core/chains/evm/calls/evmclient"
+	evmclient "github.com/ChainSafe/sygma-core/chains/evm/calls/client"
 	common "github.com/ethereum/go-ethereum/common"
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
@@ -195,7 +195,7 @@ func (mr *MockClientDispatcherMockRecorder) LockNonce() *gomock.Call {
 }
 
 // SignAndSendTransaction mocks base method.
-func (m *MockClientDispatcher) SignAndSendTransaction(ctx context.Context, tx evmclient.CommonTransaction) (common.Hash, error) {
+func (m *MockClientDispatcher) SignAndSendTransaction(ctx context.Context, tx client.CommonTransaction) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignAndSendTransaction", ctx, tx)
 	ret0, _ := ret[0].(common.Hash)
@@ -376,7 +376,7 @@ func (mr *MockContractCallerDispatcherMockRecorder) LockNonce() *gomock.Call {
 }
 
 // SignAndSendTransaction mocks base method.
-func (m *MockContractCallerDispatcher) SignAndSendTransaction(ctx context.Context, tx evmclient.CommonTransaction) (common.Hash, error) {
+func (m *MockContractCallerDispatcher) SignAndSendTransaction(ctx context.Context, tx client.CommonTransaction) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignAndSendTransaction", ctx, tx)
 	ret0, _ := ret[0].(common.Hash)

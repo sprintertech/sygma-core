@@ -1,10 +1,10 @@
-package evmgaspricer
+package gaspricer
 
 import (
 	"math/big"
 	"testing"
 
-	mock_evmgaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/evmgaspricer/mock"
+	mock_gaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/gaspricer/mock"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
@@ -12,7 +12,7 @@ import (
 
 type LondonGasPriceTestSuite struct {
 	suite.Suite
-	gasPricerMock *mock_evmgaspricer.MockLondonGasClient
+	gasPricerMock *mock_gaspricer.MockLondonGasClient
 }
 
 func TestRuLondonTestSuite(t *testing.T) {
@@ -23,7 +23,7 @@ func (s *LondonGasPriceTestSuite) SetupSuite()    {}
 func (s *LondonGasPriceTestSuite) TearDownSuite() {}
 func (s *LondonGasPriceTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
-	s.gasPricerMock = mock_evmgaspricer.NewMockLondonGasClient(gomockController)
+	s.gasPricerMock = mock_gaspricer.NewMockLondonGasClient(gomockController)
 }
 func (s *LondonGasPriceTestSuite) TearDownTest() {}
 

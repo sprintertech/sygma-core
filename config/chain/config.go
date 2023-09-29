@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type GeneralChainConfig struct {
+type ChainConfig struct {
 	Name           string `mapstructure:"name"`
 	Id             *uint8 `mapstructure:"id"`
 	Endpoint       string `mapstructure:"endpoint"`
@@ -19,7 +19,7 @@ type GeneralChainConfig struct {
 	Insecure       bool
 }
 
-func (c *GeneralChainConfig) Validate() error {
+func (c *ChainConfig) Validate() error {
 	// viper defaults to 0 for not specified ints
 	if c.Id == nil {
 		return fmt.Errorf("required field domain.Id empty for chain %v", c.Id)
@@ -33,7 +33,7 @@ func (c *GeneralChainConfig) Validate() error {
 	return nil
 }
 
-func (c *GeneralChainConfig) ParseFlags() {
+func (c *ChainConfig) ParseFlags() {
 	blockstore := viper.GetString(flags.BlockstoreFlagName)
 	if blockstore != "" {
 		c.BlockstorePath = blockstore

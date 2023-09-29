@@ -1,10 +1,8 @@
-package evmtransaction
+package transaction
 
 import (
 	"context"
 	"math/big"
-
-	"github.com/ChainSafe/sygma-core/chains/evm/calls/evmclient"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -19,7 +17,7 @@ type TX struct {
 // but return raw byte representation of transaction to be compatible and interchangeable between different go-ethereum forks
 // WithSignature returns a new transaction with the given signature.
 // This signature needs to be in the [R || S || V] format where V is 0 or 1.
-func (a *TX) RawWithSignature(signer evmclient.Signer, domainID *big.Int) ([]byte, error) {
+func (a *TX) RawWithSignature(signer client.Signer, domainID *big.Int) ([]byte, error) {
 	opts, err := newTransactorWithChainID(signer, domainID)
 	if err != nil {
 		return nil, err
@@ -39,7 +37,7 @@ func (a *TX) RawWithSignature(signer evmclient.Signer, domainID *big.Int) ([]byt
 }
 
 // NewTransaction is the ethereum transaction constructor
-func NewTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrices []*big.Int, data []byte) (evmclient.CommonTransaction, error) {
+func NewTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrices []*big.Int, data []byte) (client.CommonTransaction, error) {
 	// If there is more than one gas price returned we are sending with DynamicFeeTx's
 	if len(gasPrices) > 1 {
 		return newDynamicFeeTransaction(nonce, to, amount, gasLimit, gasPrices[0], gasPrices[1], data), nil
@@ -78,10 +76,10 @@ func (a *TX) Hash() common.Hash {
 }
 
 // newTransactorWithChainID is a utility method to easily create a transaction signer
-// for an evmclient.Signer.
+// for an client.Signer.
 // Mostly copies bind.NewKeyedTransactorWithChainID but sings with the provided signer
 // instead of a privateKey
-func newTransactorWithChainID(s evmclient.Signer, chainID *big.Int) (*bind.TransactOpts, error) {
+func newTransactorWithChainID(s client.Signer, chainID *big.Int) (*bind.TransactOpts, error) {
 	keyAddr := s.CommonAddress()
 	if chainID == nil {
 		return nil, bind.ErrNoChainID

@@ -1,11 +1,11 @@
-package evmgaspricer
+package gaspricer
 
 import (
 	"errors"
 	"math/big"
 	"testing"
 
-	mock_evmgaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/evmgaspricer/mock"
+	mock_gaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/gaspricer/mock"
 
 	"github.com/golang/mock/gomock"
 
@@ -14,7 +14,7 @@ import (
 
 type StaticGasPriceTestSuite struct {
 	suite.Suite
-	gasPricerMock *mock_evmgaspricer.MockGasPriceClient
+	gasPricerMock *mock_gaspricer.MockGasPriceClient
 }
 
 func TestRunTestSuite(t *testing.T) {
@@ -25,7 +25,7 @@ func (s *StaticGasPriceTestSuite) SetupSuite()    {}
 func (s *StaticGasPriceTestSuite) TearDownSuite() {}
 func (s *StaticGasPriceTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
-	s.gasPricerMock = mock_evmgaspricer.NewMockGasPriceClient(gomockController)
+	s.gasPricerMock = mock_gaspricer.NewMockGasPriceClient(gomockController)
 }
 func (s *StaticGasPriceTestSuite) TearDownTest() {}
 

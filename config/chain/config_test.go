@@ -6,25 +6,25 @@ import (
 
 func TestValidateConfig(t *testing.T) {
 	var id uint8 = 1
-	valid := GeneralChainConfig{
+	valid := ChainConfig{
 		Name:     "chain",
 		Id:       &id,
 		Endpoint: "endpoint",
 	}
 
-	missingEndpoint := GeneralChainConfig{
+	missingEndpoint := ChainConfig{
 		Name:     "chain",
 		Id:       &id,
 		Endpoint: "",
 	}
 
-	missingName := GeneralChainConfig{
+	missingName := ChainConfig{
 		Name:     "",
 		Id:       &id,
 		Endpoint: "endpoint",
 	}
 
-	missingId := GeneralChainConfig{
+	missingId := ChainConfig{
 		Name:     "chain",
 		Endpoint: "endpoint",
 	}

@@ -1,11 +1,11 @@
-package evmtransaction
+package transaction_test
 
 import (
 	"math/big"
 	"testing"
 
-	evmgaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/evmgaspricer"
-	mock_evmgaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/evmgaspricer/mock"
+	gaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/gaspricer"
+	mock_gaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/gaspricer/mock"
 
 	"github.com/ethereum/go-ethereum/core/types"
 
@@ -21,7 +21,7 @@ var aliceKp = keystore.TestKeyRing.EthereumKeys[keystore.AliceKey]
 
 type EVMTxTestSuite struct {
 	suite.Suite
-	client *mock_evmgaspricer.MockLondonGasClient
+	client *mock_gaspricer.MockLondonGasClient
 }
 
 func TestRunTestSuite(t *testing.T) {
@@ -32,14 +32,14 @@ func (s *EVMTxTestSuite) SetupSuite()    {}
 func (s *EVMTxTestSuite) TearDownSuite() {}
 func (s *EVMTxTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
-	s.client = mock_evmgaspricer.NewMockLondonGasClient(gomockController)
+	s.client = mock_gaspricer.NewMockLondonGasClient(gomockController)
 }
 func (s *EVMTxTestSuite) TearDownTest() {}
 
 func (s *EVMTxTestSuite) TestNewTransactionWithStaticGasPricer() {
 	s.client.EXPECT().SuggestGasPrice(gomock.Any()).Return(big.NewInt(1000), nil)
 	txFabric := NewTransaction
-	gasPriceClient := evmgaspricer.NewStaticGasPriceDeterminant(s.client, nil)
+	gasPriceClient := gaspricer.NewStaticGasPriceDeterminant(s.client, nil)
 	gp, err := gasPriceClient.GasPrice(nil)
 	s.Nil(err)
 	tx, err := txFabric(1, &common.Address{}, big.NewInt(0), 10000, gp, []byte{})
@@ -56,7 +56,7 @@ func (s *EVMTxTestSuite) TestNewTransactionWithLondonGasPricer() {
 	s.client.EXPECT().BaseFee().Return(big.NewInt(1000), nil)
 	s.client.EXPECT().SuggestGasTipCap(gomock.Any()).Return(big.NewInt(1000), nil)
 	txFabric := NewTransaction
-	gasPriceClient := evmgaspricer.NewLondonGasPriceClient(s.client, nil)
+	gasPriceClient := gaspricer.NewLondonGasPriceClient(s.client, nil)
 	gp, err := gasPriceClient.GasPrice(nil)
 	s.Nil(err)
 	tx, err := txFabric(1, &common.Address{}, big.NewInt(0), 10000, gp, []byte{})

@@ -4,12 +4,12 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/calls/evmclient"
+	"github.com/ChainSafe/sygma-core/chains/evm/calls/client"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-type TxFabric func(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrices []*big.Int, data []byte) (evmclient.CommonTransaction, error)
+type TxFabric func(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrices []*big.Int, data []byte) (client.CommonTransaction, error)
 
 type ContractChecker interface {
 	CodeAt(ctx context.Context, contract common.Address, blockNumber *big.Int) ([]byte, error)
@@ -26,7 +26,7 @@ type GasPricer interface {
 
 type ClientDispatcher interface {
 	TxReceipt(h common.Hash) (*types.Receipt, error)
-	SignAndSendTransaction(ctx context.Context, tx evmclient.CommonTransaction) (common.Hash, error)
+	SignAndSendTransaction(ctx context.Context, tx client.CommonTransaction) (common.Hash, error)
 	TransactionReceipt(ctx context.Context, txHash common.Hash) (*types.Receipt, error)
 	GetTransactionByHash(h common.Hash) (tx *types.Transaction, isPending bool, err error)
 	UnsafeNonce() (*big.Int, error)

@@ -8,7 +8,6 @@ import (
 	"time"
 
 	mock_calls "github.com/ChainSafe/sygma-core/chains/evm/calls/mock"
-	evmtransaction "github.com/ChainSafe/sygma-core/chains/evm/calls/transaction"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/transactor"
 	mock_transactor "github.com/ChainSafe/sygma-core/chains/evm/calls/transactor/mock"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/transactor/monitored"
@@ -48,7 +47,7 @@ func (s *TransactorTestSuite) TestTransactor_SignAndSend_Success() {
 	s.mockContractCallerDispatcherClient.EXPECT().UnlockNonce()
 
 	t := monitored.NewMonitoredTransactor(
-		evmtransaction.NewTransaction,
+		transaction.NewTransaction,
 		s.mockGasPricer,
 		s.mockContractCallerDispatcherClient,
 		big.NewInt(1000),
@@ -73,7 +72,7 @@ func (s *TransactorTestSuite) TestTransactor_SignAndSend_Fail() {
 	s.mockContractCallerDispatcherClient.EXPECT().UnlockNonce()
 
 	t := monitored.NewMonitoredTransactor(
-		evmtransaction.NewTransaction,
+		transactionNewTransaction,
 		s.mockGasPricer,
 		s.mockContractCallerDispatcherClient,
 		big.NewInt(1000),
