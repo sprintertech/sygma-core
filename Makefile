@@ -33,12 +33,12 @@ install-subkey:
 	cargo install --force --git https://github.com/paritytech/substrate subkey
 
 genmocks:
-	mockgen -destination=./chains/evm/calls/gaspricer/mock/gas-pricer.go -source=./chains/evm/calls/gaspricer/gas-pricer.go
+	mockgen -destination=./chains/evm/gaspricer/mock/gas-pricer.go -source=./chains/evm/gaspricer/gas-pricer.go
 	mockgen -destination=./relayer/mock/relayer.go -source=./relayer/relayer.go
-	mockgen -source=chains/evm/calls/calls.go -destination=chains/evm/calls/mock/calls.go
-	mockgen -source=chains/evm/calls/transactor/transact.go -destination=chains/evm/calls/transactor/mock/transact.go
+	mockgen -source=chains/evm/calls.go -destination=chains/evm/mock/calls.go
+	mockgen -source=chains/evm/transactor/transact.go -destination=chains/evm/transactor/mock/transact.go
 	mockgen -destination=chains/evm/executor/mock/voter.go github.com/ChainSafe/sygma-core/chains/evm/executor ChainClient,MessageHandler,BridgeContract
-	mockgen -destination=./chains/evm/calls/transactor/itx/mock/itx.go -source=./chains/evm/calls/transactor/itx/itx.go
-	mockgen -destination=./chains/evm/calls/transactor/itx//mock/minimalForwarder.go -source=./chains/evm/calls/transactor/itx/minimalForwarder.go
+	mockgen -destination=./chains/evm/transactor/itx/mock/itx.go -source=./chains/evm/transactor/itx/itx.go
+	mockgen -destination=./chains/evm/transactor/itx//mock/minimalForwarder.go -source=./chains/evm/transactor/itx/minimalForwarder.go
 	mockgen -destination=chains/evm/cli/bridge/mock/vote-proposal.go -source=./chains/evm/cli/bridge/vote-proposal.go
 	mockgen -destination=chains/evm/listener/mock/listener.go -source=./chains/evm/listener/event-handler.go

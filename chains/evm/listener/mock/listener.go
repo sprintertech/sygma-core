@@ -9,7 +9,7 @@ import (
 	big "math/big"
 	reflect "reflect"
 
-	events "github.com/ChainSafe/sygma-core/chains/evm/calls/events"
+	events "github.com/ChainSafe/sygma-core/chains/evm/events"
 	message "github.com/ChainSafe/sygma-core/relayer/message"
 	types "github.com/ChainSafe/sygma-core/types"
 	common "github.com/ethereum/go-ethereum/common"

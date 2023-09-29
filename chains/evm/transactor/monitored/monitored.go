@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/ChainSafe/sygma-core/chains/evm/calls"
-	"github.com/ChainSafe/sygma-core/chains/evm/calls/transactor"
+	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
 )
 
 type RawTx struct {

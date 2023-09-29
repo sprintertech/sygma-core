@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/calls/events"
+	"github.com/ChainSafe/sygma-core/chains/evm/events"
 	"github.com/ChainSafe/sygma-core/chains/evm/listener"
 	mock_listener "github.com/ChainSafe/sygma-core/chains/evm/listener/mock"
 	"github.com/ChainSafe/sygma-core/relayer/message"

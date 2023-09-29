@@ -4,9 +4,9 @@ import (
 	"math/big"
 	"testing"
 
-	gaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/gaspricer"
-	mock_gaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/gaspricer/mock"
-	"github.com/ChainSafe/sygma-core/chains/evm/calls/transaction"
+	gaspricer "github.com/ChainSafe/sygma-core/chains/evm/gaspricer"
+	mock_gaspricer "github.com/ChainSafe/sygma-core/chains/evm/gaspricer/mock"
+	"github.com/ChainSafe/sygma-core/chains/evm/transaction"
 
 	"github.com/ethereum/go-ethereum/core/types"
 

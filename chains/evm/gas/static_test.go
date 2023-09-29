@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	mock_gaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/gaspricer/mock"
+	mock_gaspricer "github.com/ChainSafe/sygma-core/chains/evm/gaspricer/mock"
 
 	"github.com/golang/mock/gomock"
 
