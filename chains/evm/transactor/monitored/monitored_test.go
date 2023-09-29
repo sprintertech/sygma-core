@@ -8,6 +8,7 @@ import (
 	"time"
 
 	mock_calls "github.com/ChainSafe/sygma-core/chains/evm/calls/mock"
+	"github.com/ChainSafe/sygma-core/chains/evm/calls/transaction"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/transactor"
 	mock_transactor "github.com/ChainSafe/sygma-core/chains/evm/calls/transactor/mock"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/transactor/monitored"

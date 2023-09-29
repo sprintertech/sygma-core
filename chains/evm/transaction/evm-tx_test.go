@@ -6,6 +6,7 @@ import (
 
 	gaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/gaspricer"
 	mock_gaspricer "github.com/ChainSafe/sygma-core/chains/evm/calls/gaspricer/mock"
+	"github.com/ChainSafe/sygma-core/chains/evm/calls/transaction"
 
 	"github.com/ethereum/go-ethereum/core/types"
 
@@ -38,7 +39,7 @@ func (s *EVMTxTestSuite) TearDownTest() {}
 
 func (s *EVMTxTestSuite) TestNewTransactionWithStaticGasPricer() {
 	s.client.EXPECT().SuggestGasPrice(gomock.Any()).Return(big.NewInt(1000), nil)
-	txFabric := NewTransaction
+	txFabric := transaction.NewTransaction
 	gasPriceClient := gaspricer.NewStaticGasPriceDeterminant(s.client, nil)
 	gp, err := gasPriceClient.GasPrice(nil)
 	s.Nil(err)
@@ -55,7 +56,7 @@ func (s *EVMTxTestSuite) TestNewTransactionWithStaticGasPricer() {
 func (s *EVMTxTestSuite) TestNewTransactionWithLondonGasPricer() {
 	s.client.EXPECT().BaseFee().Return(big.NewInt(1000), nil)
 	s.client.EXPECT().SuggestGasTipCap(gomock.Any()).Return(big.NewInt(1000), nil)
-	txFabric := NewTransaction
+	txFabric := transaction.NewTransaction
 	gasPriceClient := gaspricer.NewLondonGasPriceClient(s.client, nil)
 	gp, err := gasPriceClient.GasPrice(nil)
 	s.Nil(err)

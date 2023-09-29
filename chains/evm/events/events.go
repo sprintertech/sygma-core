@@ -16,8 +16,6 @@ const (
 	DepositSig EventSig = "Deposit(uint8,bytes32,uint64,address,bytes,bytes)"
 )
 
-// Deposit struct holds event data with all necessary parameters and a handler response
-// https://github.com/ChainSafe/chainbridge-solidity/blob/develop/contracts/Bridge.sol#L47
 type Deposit struct {
 	// ID of chain deposit will be bridged to
 	DestinationDomainID uint8
