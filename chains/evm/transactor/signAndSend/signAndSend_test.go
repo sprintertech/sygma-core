@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	mock_calls "github.com/ChainSafe/sygma-core/chains/evm/mock"
-	"github.com/ChainSafe/sygma-core/chains/evm/transaction"
 	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
 	mock_transactor "github.com/ChainSafe/sygma-core/chains/evm/transactor/mock"
 	"github.com/ChainSafe/sygma-core/chains/evm/transactor/signAndSend"
+	"github.com/ChainSafe/sygma-core/chains/evm/transactor/transaction"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/golang/mock/gomock"

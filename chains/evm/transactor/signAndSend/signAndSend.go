@@ -5,8 +5,8 @@ import (
 	"math/big"
 
 	"github.com/ChainSafe/sygma-core/chains/evm/client"
-	"github.com/ChainSafe/sygma-core/chains/evm/transaction"
 	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
+	"github.com/ChainSafe/sygma-core/chains/evm/transactor/transaction"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog/log"
 )

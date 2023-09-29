@@ -11,8 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/ChainSafe/sygma-core/chains/evm/client"
-	"github.com/ChainSafe/sygma-core/chains/evm/transaction"
 	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
+	"github.com/ChainSafe/sygma-core/chains/evm/transactor/transaction"
 )
 
 type GasPricer interface {
