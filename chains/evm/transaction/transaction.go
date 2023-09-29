@@ -10,6 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
+type TxFabric func(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrices []*big.Int, data []byte) (client.CommonTransaction, error)
+
 type TX struct {
 	tx *types.Transaction
 }

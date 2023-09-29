@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/calls"
+	"github.com/ChainSafe/sygma-core/chains/evm/client"
 	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -19,7 +19,7 @@ type Contract struct {
 	contractAddress common.Address
 	ABI             abi.ABI
 	bytecode        []byte
-	client          calls.ContractCallerDispatcher
+	client          client.Client
 	transactor.Transactor
 }
 
@@ -27,7 +27,7 @@ func NewContract(
 	contractAddress common.Address,
 	abi abi.ABI,
 	bytecode []byte,
-	client calls.ContractCallerDispatcher,
+	client client.Client,
 	transactor transactor.Transactor,
 ) Contract {
 	return Contract{
@@ -87,7 +87,7 @@ func (c *Contract) CallContract(method string, args ...interface{}) ([]interface
 		return nil, err
 	}
 	msg := ethereum.CallMsg{From: c.client.From(), To: &c.contractAddress, Data: input}
-	out, err := c.client.CallContract(context.TODO(), calls.ToCallArg(msg), nil)
+	out, err := c.client.CallContract(context.TODO(), client.ToCallArg(msg), nil)
 	if err != nil {
 		log.Error().
 			Str("contract", c.contractAddress.String()).

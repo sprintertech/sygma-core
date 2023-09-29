@@ -25,19 +25,21 @@ type DepositEventHandler struct {
 	depositHandler DepositHandler
 
 	bridgeAddress common.Address
+	msgChan       chan []*message.Message
 	domainID      uint8
 }
 
-func NewDepositEventHandler(eventListener EventListener, depositHandler DepositHandler, bridgeAddress common.Address, domainID uint8) *DepositEventHandler {
+func NewDepositEventHandler(eventListener EventListener, depositHandler DepositHandler, bridgeAddress common.Address, domainID uint8, msgChan chan []*message.Message) *DepositEventHandler {
 	return &DepositEventHandler{
 		eventListener:  eventListener,
 		depositHandler: depositHandler,
 		bridgeAddress:  bridgeAddress,
 		domainID:       domainID,
+		msgChan:        msgChan,
 	}
 }
 
-func (eh *DepositEventHandler) HandleEvent(startBlock *big.Int, endBlock *big.Int, msgChan chan []*message.Message) error {
+func (eh *DepositEventHandler) HandleEvent(startBlock *big.Int, endBlock *big.Int) error {
 	deposits, err := eh.eventListener.FetchDeposits(context.Background(), eh.bridgeAddress, startBlock, endBlock)
 	if err != nil {
 		return fmt.Errorf("unable to fetch deposit events because of: %+v", err)
@@ -65,7 +67,7 @@ func (eh *DepositEventHandler) HandleEvent(startBlock *big.Int, endBlock *big.In
 
 	for _, deposits := range domainDeposits {
 		go func(d []*message.Message) {
-			msgChan <- d
+			eh.msgChan <- d
 		}(deposits)
 	}
 

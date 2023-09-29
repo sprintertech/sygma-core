@@ -4,19 +4,24 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/calls"
+	"github.com/ChainSafe/sygma-core/chains/evm/client"
+	"github.com/ChainSafe/sygma-core/chains/evm/transaction"
 	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog/log"
 )
 
-type signAndSendTransactor struct {
-	TxFabric       calls.TxFabric
-	gasPriceClient calls.GasPricer
-	client         calls.ClientDispatcher
+type GasPricer interface {
+	GasPrice(priority *uint8) ([]*big.Int, error)
 }
 
-func NewSignAndSendTransactor(txFabric calls.TxFabric, gasPriceClient calls.GasPricer, client calls.ClientDispatcher) transactor.Transactor {
+type signAndSendTransactor struct {
+	TxFabric       transaction.TxFabric
+	gasPriceClient GasPricer
+	client         client.Client
+}
+
+func NewSignAndSendTransactor(txFabric transaction.TxFabric, gasPriceClient GasPricer, client client.Client) transactor.Transactor {
 	return &signAndSendTransactor{
 		TxFabric:       txFabric,
 		gasPriceClient: gasPriceClient,
@@ -66,7 +71,7 @@ func (t *signAndSendTransactor) Transact(to *common.Address, data []byte, opts t
 		return &common.Hash{}, err
 	}
 
-	_, err = t.client.TxReceipt(h)
+	_, err = t.client.WaitAndReturnTxReceipt(h)
 	if err != nil {
 		return &common.Hash{}, err
 	}

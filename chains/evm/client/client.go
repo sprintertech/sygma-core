@@ -19,6 +19,28 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
+type ContractCaller interface {
+	CallContract(ctx context.Context, callArgs map[string]interface{}, blockNumber *big.Int) ([]byte, error)
+	CodeAt(ctx context.Context, contract common.Address, blockNumber *big.Int) ([]byte, error)
+}
+
+type TransactionDispatcher interface {
+	WaitAndReturnTxReceipt(h common.Hash) (*types.Receipt, error)
+	SignAndSendTransaction(ctx context.Context, tx CommonTransaction) (common.Hash, error)
+	TransactionReceipt(ctx context.Context, txHash common.Hash) (*types.Receipt, error)
+	GetTransactionByHash(h common.Hash) (tx *types.Transaction, isPending bool, err error)
+	UnsafeNonce() (*big.Int, error)
+	LockNonce()
+	UnlockNonce()
+	UnsafeIncreaseNonce() error
+	From() common.Address
+}
+
+type Client interface {
+	ContractCaller
+	TransactionDispatcher
+}
+
 type EVMClient struct {
 	*ethclient.Client
 	signer     Signer

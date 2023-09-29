@@ -10,9 +10,14 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/rs/zerolog/log"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/calls"
+	"github.com/ChainSafe/sygma-core/chains/evm/client"
+	"github.com/ChainSafe/sygma-core/chains/evm/transaction"
 	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
 )
+
+type GasPricer interface {
+	GasPrice(priority *uint8) ([]*big.Int, error)
+}
 
 type RawTx struct {
 	nonce        uint64
@@ -26,9 +31,9 @@ type RawTx struct {
 }
 
 type MonitoredTransactor struct {
-	txFabric       calls.TxFabric
-	gasPriceClient calls.GasPricer
-	client         calls.ClientDispatcher
+	txFabric       transaction.TxFabric
+	gasPriceClient GasPricer
+	client         client.Client
 
 	maxGasPrice        *big.Int
 	increasePercentage *big.Int
@@ -44,9 +49,9 @@ type MonitoredTransactor struct {
 // Gas price is increased by increasePercentage param which
 // is a percentage value with which old gas price should be increased (e.g 15)
 func NewMonitoredTransactor(
-	txFabric calls.TxFabric,
-	gasPriceClient calls.GasPricer,
-	client calls.ClientDispatcher,
+	txFabric transaction.TxFabric,
+	gasPriceClient GasPricer,
+	client client.Client,
 	maxGasPrice *big.Int,
 	increasePercentage *big.Int,
 ) *MonitoredTransactor {
