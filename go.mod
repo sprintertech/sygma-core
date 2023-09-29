@@ -19,8 +19,6 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v0.39.0
 	go.opentelemetry.io/otel/metric v1.16.0
 	go.opentelemetry.io/otel/sdk/metric v0.39.0
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-	golang.org/x/term v0.6.0
 )
 
 require (
@@ -31,6 +29,7 @@ require (
 	github.com/status-im/keycard-go v0.0.0-20211004132608-c32310e39b86 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.16.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.39.0 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 )
 
 require (

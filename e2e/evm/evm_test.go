@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/ChainSafe/chainbridge-core/chains/evm/cli/local"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/evmclient"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/evmtransaction"
@@ -19,29 +20,17 @@ import (
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/contracts/centrifuge"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/contracts/erc20"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/contracts/erc721"
-	"github.com/ChainSafe/sygma-core/chains/evm/cli/local"
 	"github.com/ChainSafe/sygma-core/keystore"
-	"github.com/ethereum/go-ethereum"
 
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/suite"
 )
-
-type TestClient interface {
-	local.EVMClient
-	LatestBlock() (*big.Int, error)
-	CodeAt(ctx context.Context, contractAddress common.Address, block *big.Int) ([]byte, error)
-	FetchEventLogs(ctx context.Context, contractAddress common.Address, event string, startBlock *big.Int, endBlock *big.Int) ([]types.Log, error)
-	SubscribeFilterLogs(ctx context.Context, q ethereum.FilterQuery, ch chan<- types.Log) (ethereum.Subscription, error)
-	TransactionByHash(ctx context.Context, hash common.Hash) (tx *types.Transaction, isPending bool, err error)
-}
 
 const ETHEndpoint1 = "ws://localhost:8546"
 const ETHEndpoint2 = "ws://localhost:8548"
 
 // Alice key is used by the relayer, Eve key is used as admin and depositter
 func Test_EVM2EVM(t *testing.T) {
-	config := local.BridgeConfig{
+	config := evm.BridgeConfig{
 		BridgeAddr: common.HexToAddress("0xd606A00c1A39dA53EA7Bb3Ab570BBE40b156EB66"),
 
 		Erc20Addr:        common.HexToAddress("0x75dF75bcdCa8eA2360c562b4aaDBAF3dfAf5b19b"),
@@ -86,11 +75,11 @@ func Test_EVM2EVM(t *testing.T) {
 
 func NewEVM2EVMTestSuite(
 	fabric1, fabric2 calls.TxFabric,
-	client1, client2 TestClient,
+	client1, client2 evm.EVMClient,
 	gasPricer1, gasPricer2 calls.GasPricer,
-	config1, config2 local.BridgeConfig,
-) *IntegrationTestSuite {
-	return &IntegrationTestSuite{
+	config1, config2 evm.BridgeConfig,
+) *EVMTestSuite {
+	return &EVMTestSuite{
 		fabric1:    fabric1,
 		fabric2:    fabric2,
 		client1:    client1,
@@ -102,10 +91,10 @@ func NewEVM2EVMTestSuite(
 	}
 }
 
-type IntegrationTestSuite struct {
+type EVMTestSuite struct {
 	suite.Suite
-	client1    TestClient
-	client2    TestClient
+	client1    calls.ClientDispatcher
+	client2    calls.ClientDispatcher
 	gasPricer1 calls.GasPricer
 	gasPricer2 calls.GasPricer
 	fabric1    calls.TxFabric
@@ -115,14 +104,14 @@ type IntegrationTestSuite struct {
 }
 
 // SetupSuite waits until all contracts are deployed
-func (s *IntegrationTestSuite) SetupSuite() {
+func (s *EVMTestSuite) SetupSuite() {
 	err := evm.WaitUntilBridgeReady(s.client2, s.config2.BridgeAddr)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (s *IntegrationTestSuite) Test_Erc20Deposit() {
+func (s *EVMTestSuite) Test_Erc20Deposit() {
 	dstAddr := keystore.TestKeyRing.EthereumKeys[keystore.BobKey].CommonAddress()
 
 	transactor1 := signAndSend.NewSignAndSendTransactor(s.fabric1, s.gasPricer1, s.client1)
@@ -162,7 +151,7 @@ func (s *IntegrationTestSuite) Test_Erc20Deposit() {
 	s.Equal(1, destBalanceAfter.Cmp(destBalanceBefore))
 }
 
-func (s *IntegrationTestSuite) Test_Erc721Deposit() {
+func (s *EVMTestSuite) Test_Erc721Deposit() {
 	tokenId := big.NewInt(1)
 	metadata := "metadata.url"
 
@@ -220,7 +209,7 @@ func (s *IntegrationTestSuite) Test_Erc721Deposit() {
 	s.Equal(dstAddr.String(), owner.String())
 }
 
-func (s *IntegrationTestSuite) Test_GenericDeposit() {
+func (s *EVMTestSuite) Test_GenericDeposit() {
 	transactor1 := signAndSend.NewSignAndSendTransactor(s.fabric1, s.gasPricer1, s.client1)
 	transactor2 := signAndSend.NewSignAndSendTransactor(s.fabric2, s.gasPricer2, s.client2)
 

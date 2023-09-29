@@ -58,10 +58,6 @@ func NewEVMClient(url string, signer Signer) (*EVMClient, error) {
 	return c, nil
 }
 
-func (c *EVMClient) SubscribePendingTransactions(ctx context.Context, ch chan<- common.Hash) (*rpc.ClientSubscription, error) {
-	return c.gethClient.SubscribePendingTransactions(ctx, ch)
-}
-
 // LatestBlock returns the latest block from the current chain
 func (c *EVMClient) LatestBlock() (*big.Int, error) {
 	var head *headerNumber
@@ -92,23 +88,6 @@ func (h *headerNumber) UnmarshalJSON(input []byte) error {
 	}
 	h.Number = (*big.Int)(dec.Number)
 	return nil
-}
-
-func (c *EVMClient) WaitAndReturnTxReceipt(h common.Hash) (*types.Receipt, error) {
-	retry := 50
-	for retry > 0 {
-		receipt, err := c.Client.TransactionReceipt(context.Background(), h)
-		if err != nil {
-			retry--
-			time.Sleep(5 * time.Second)
-			continue
-		}
-		if receipt.Status != 1 {
-			return receipt, fmt.Errorf("transaction failed on chain. Receipt status %v", receipt.Status)
-		}
-		return receipt, nil
-	}
-	return nil, errors.New("tx did not appear")
 }
 
 func (c *EVMClient) GetTransactionByHash(h common.Hash) (tx *types.Transaction, isPending bool, err error) {
@@ -154,15 +133,6 @@ func (c *EVMClient) CallContext(ctx context.Context, target interface{}, rpcMeth
 	return nil
 }
 
-func (c *EVMClient) PendingCallContract(ctx context.Context, callArgs map[string]interface{}) ([]byte, error) {
-	var hex hexutil.Bytes
-	err := c.rpClient.CallContext(ctx, &hex, "eth_call", callArgs, "pending")
-	if err != nil {
-		return nil, err
-	}
-	return hex, nil
-}
-
 func (c *EVMClient) From() common.Address {
 	return c.signer.CommonAddress()
 }
@@ -185,8 +155,21 @@ func (c *EVMClient) SignAndSendTransaction(ctx context.Context, tx CommonTransac
 	return tx.Hash(), nil
 }
 
-func (c *EVMClient) RelayerAddress() common.Address {
-	return c.signer.CommonAddress()
+func (c *EVMClient) WaitAndReturnTxReceipt(h common.Hash) (*types.Receipt, error) {
+	retry := 50
+	for retry > 0 {
+		receipt, err := c.Client.TransactionReceipt(context.Background(), h)
+		if err != nil {
+			retry--
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		if receipt.Status != 1 {
+			return receipt, fmt.Errorf("transaction failed on chain. Receipt status %v", receipt.Status)
+		}
+		return receipt, nil
+	}
+	return nil, errors.New("tx did not appear")
 }
 
 func (c *EVMClient) LockNonce() {

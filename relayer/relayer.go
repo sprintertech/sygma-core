@@ -5,7 +5,6 @@ package relayer
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/ChainSafe/sygma-core/relayer/message"
 	"github.com/rs/zerolog/log"
@@ -23,15 +22,14 @@ type RelayedChain interface {
 	DomainID() uint8
 }
 
-func NewRelayer(chains []RelayedChain, metrics DepositMeter, messageProcessors ...message.MessageProcessor) *Relayer {
-	return &Relayer{relayedChains: chains, messageProcessors: messageProcessors, metrics: metrics}
+func NewRelayer(chains []RelayedChain, metrics DepositMeter) *Relayer {
+	return &Relayer{relayedChains: chains, metrics: metrics}
 }
 
 type Relayer struct {
-	metrics           DepositMeter
-	relayedChains     []RelayedChain
-	registry          map[uint8]RelayedChain
-	messageProcessors []message.MessageProcessor
+	metrics       DepositMeter
+	relayedChains []RelayedChain
+	registry      map[uint8]RelayedChain
 }
 
 // Start function starts the relayer. Relayer routine is starting all the chains
@@ -67,16 +65,10 @@ func (r *Relayer) route(msgs []*message.Message) {
 
 	for _, m := range msgs {
 		r.metrics.TrackDepositMessage(m)
-
-		for _, mp := range r.messageProcessors {
-			if err := mp(m); err != nil {
-				log.Error().Err(fmt.Errorf("error %w processing mesage %v", err, m))
-				return
-			}
-		}
 	}
 
 	log.Debug().Msgf("Sending messages %+v to destination %v", msgs, destChain.DomainID())
+
 	err := destChain.Write(msgs)
 	if err != nil {
 		for _, m := range msgs {

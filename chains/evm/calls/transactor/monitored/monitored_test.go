@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/calls/evmtransaction"
 	mock_calls "github.com/ChainSafe/sygma-core/chains/evm/calls/mock"
+	evmtransaction "github.com/ChainSafe/sygma-core/chains/evm/calls/transaction"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/transactor"
 	mock_transactor "github.com/ChainSafe/sygma-core/chains/evm/calls/transactor/mock"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/transactor/monitored"
@@ -100,7 +100,7 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_SuccessfulExec
 
 	ctx, cancel := context.WithCancel(context.Background())
 	t := monitored.NewMonitoredTransactor(
-		evmtransaction.NewTransaction,
+		transaction.NewTransaction,
 		s.mockGasPricer,
 		s.mockContractCallerDispatcherClient,
 		big.NewInt(1000),
@@ -135,7 +135,7 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_TxTimeout() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	t := monitored.NewMonitoredTransactor(
-		evmtransaction.NewTransaction,
+		transaction.NewTransaction,
 		s.mockGasPricer,
 		s.mockContractCallerDispatcherClient,
 		big.NewInt(1000),
@@ -170,7 +170,7 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_TransactionRes
 
 	ctx, cancel := context.WithCancel(context.Background())
 	t := monitored.NewMonitoredTransactor(
-		evmtransaction.NewTransaction,
+		transaction.NewTransaction,
 		s.mockGasPricer,
 		s.mockContractCallerDispatcherClient,
 		big.NewInt(1000),
@@ -209,7 +209,7 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_MaxGasPriceRea
 
 	ctx, cancel := context.WithCancel(context.Background())
 	t := monitored.NewMonitoredTransactor(
-		evmtransaction.NewTransaction,
+		transaction.NewTransaction,
 		s.mockGasPricer,
 		s.mockContractCallerDispatcherClient,
 		big.NewInt(10),
@@ -234,7 +234,7 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_MaxGasPriceRea
 
 func (s *TransactorTestSuite) TestTransactor_IncreaseGas_15PercentIncrease() {
 	t := monitored.NewMonitoredTransactor(
-		evmtransaction.NewTransaction,
+		transaction.NewTransaction,
 		s.mockGasPricer,
 		s.mockContractCallerDispatcherClient,
 		big.NewInt(150),
@@ -247,7 +247,7 @@ func (s *TransactorTestSuite) TestTransactor_IncreaseGas_15PercentIncrease() {
 
 func (s *TransactorTestSuite) TestTransactor_IncreaseGas_MaxGasReached() {
 	t := monitored.NewMonitoredTransactor(
-		evmtransaction.NewTransaction,
+		transaction.NewTransaction,
 		s.mockGasPricer,
 		s.mockContractCallerDispatcherClient,
 		big.NewInt(15),

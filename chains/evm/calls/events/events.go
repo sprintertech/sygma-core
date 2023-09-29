@@ -13,10 +13,7 @@ func (es EventSig) GetTopic() common.Hash {
 }
 
 const (
-	DepositSig          EventSig = "Deposit(uint8,bytes32,uint64,address,bytes,bytes)"
-	ThresholdChangedSig EventSig = "RelayerThresholdChanged(uint256)"
-	ProposalEventSig    EventSig = "ProposalEvent(uint8,uint64,uint8,bytes32)"
-	ProposalVoteSig     EventSig = "ProposalVote(uint8,uint64,uint8,bytes32)"
+	DepositSig EventSig = "Deposit(uint8,bytes32,uint64,address,bytes,bytes)"
 )
 
 // Deposit struct holds event data with all necessary parameters and a handler response

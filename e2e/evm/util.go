@@ -7,22 +7,60 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ChainSafe/sygma-core/chains/evm/calls"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/consts"
 	"github.com/ChainSafe/sygma-core/chains/evm/calls/events"
+	"github.com/ChainSafe/sygma-core/chains/evm/calls/evmgaspricer"
+	"github.com/ChainSafe/sygma-core/types"
 	"github.com/rs/zerolog/log"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	ethereumTypes "github.com/ethereum/go-ethereum/core/types"
 )
 
 var TestTimeout = time.Second * 600
 
+type BridgeConfig struct {
+	BridgeAddr common.Address
+
+	Erc20Addr        common.Address
+	Erc20HandlerAddr common.Address
+	Erc20ResourceID  types.ResourceID
+
+	Erc20LockReleaseAddr        common.Address
+	Erc20LockReleaseHandlerAddr common.Address
+	Erc20LockReleaseResourceID  types.ResourceID
+
+	GenericHandlerAddr common.Address
+	AssetStoreAddr     common.Address
+	GenericResourceID  types.ResourceID
+
+	PermissionlessGenericHandlerAddr common.Address
+	PermissionlessGenericResourceID  types.ResourceID
+
+	Erc721Addr        common.Address
+	Erc721HandlerAddr common.Address
+	Erc721ResourceID  types.ResourceID
+
+	BasicFeeHandlerAddr      common.Address
+	FeeRouterAddress         common.Address
+	FeeHandlerWithOracleAddr common.Address
+	BasicFee                 *big.Int
+	OracleFee                uint16
+}
+
+type EVMClient interface {
+	calls.ContractCallerDispatcher
+	evmgaspricer.GasPriceClient
+	ChainID(ctx context.Context) (*big.Int, error)
+}
+
 type Client interface {
 	LatestBlock() (*big.Int, error)
-	SubscribeFilterLogs(ctx context.Context, q ethereum.FilterQuery, ch chan<- types.Log) (ethereum.Subscription, error)
-	FetchEventLogs(ctx context.Context, contractAddress common.Address, event string, startBlock *big.Int, endBlock *big.Int) ([]types.Log, error)
+	SubscribeFilterLogs(ctx context.Context, q ethereum.FilterQuery, ch chan<- ethereumTypes.Log) (ethereum.Subscription, error)
+	FetchEventLogs(ctx context.Context, contractAddress common.Address, event string, startBlock *big.Int, endBlock *big.Int) ([]ethereumTypes.Log, error)
 }
 
 func WaitUntilProposalExecuted(client Client, bridge common.Address) error {
@@ -36,7 +74,7 @@ func WaitUntilProposalExecuted(client Client, bridge common.Address) error {
 		},
 	}
 	timeout := time.After(TestTimeout)
-	ch := make(chan types.Log)
+	ch := make(chan ethereumTypes.Log)
 	a, err := abi.JSON(strings.NewReader(consts.BridgeABI))
 	if err != nil {
 		return err
@@ -150,7 +188,7 @@ func WaitUntilBridgeReady(client Client, bridge common.Address) error {
 			{events.ThresholdChangedSig.GetTopic()},
 		},
 	}
-	ch := make(chan types.Log)
+	ch := make(chan ethereumTypes.Log)
 	sub, err := client.SubscribeFilterLogs(context.Background(), query, ch)
 	if err != nil {
 		return err
