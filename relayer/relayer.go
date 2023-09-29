@@ -17,7 +17,7 @@ type DepositMeter interface {
 }
 
 type RelayedChain interface {
-	PollEvents(ctx context.Context, sysErr chan<- error, msgChan chan []*types.Message)
+	PollEvents(ctx context.Context, sysErr chan<- error)
 	Write(messages []*types.Message) error
 	DomainID() uint8
 }
@@ -34,19 +34,18 @@ type Relayer struct {
 
 // Start function starts the relayer. Relayer routine is starting all the chains
 // and passing them with a channel that accepts unified cross chain message format
-func (r *Relayer) Start(ctx context.Context, sysErr chan error) {
+func (r *Relayer) Start(ctx context.Context, msgChan chan []*types.Message, sysErr chan error) {
 	log.Debug().Msgf("Starting relayer")
 
-	messagesChannel := make(chan []*types.Message)
 	for _, c := range r.relayedChains {
 		log.Debug().Msgf("Starting chain %v", c.DomainID())
 		r.addRelayedChain(c)
-		go c.PollEvents(ctx, sysErr, messagesChannel)
+		go c.PollEvents(ctx, sysErr)
 	}
 
 	for {
 		select {
-		case m := <-messagesChannel:
+		case m := <-msgChan:
 			go r.route(m)
 			continue
 		case <-ctx.Done():

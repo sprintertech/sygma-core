@@ -14,7 +14,7 @@ import (
 )
 
 type EventListener interface {
-	ListenToEvents(ctx context.Context, startBlock *big.Int, msgChan chan []*types.Message, errChan chan<- error)
+	ListenToEvents(ctx context.Context, startBlock *big.Int, errChan chan<- error)
 }
 
 type ProposalExecutor interface {
@@ -47,7 +47,7 @@ func NewEVMChain(listener EventListener, writer ProposalExecutor, blockstore *st
 
 // PollEvents is the goroutine that polls blocks and searches Deposit events in them.
 // Events are then sent to eventsChan.
-func (c *EVMChain) PollEvents(ctx context.Context, sysErr chan<- error, msgChan chan []*types.Message) {
+func (c *EVMChain) PollEvents(ctx context.Context, sysErr chan<- error) {
 	log.Info().Msg("Polling Blocks...")
 
 	startBlock, err := c.blockstore.GetStartBlock(
@@ -61,7 +61,7 @@ func (c *EVMChain) PollEvents(ctx context.Context, sysErr chan<- error, msgChan 
 		return
 	}
 
-	go c.listener.ListenToEvents(ctx, startBlock, msgChan, sysErr)
+	go c.listener.ListenToEvents(ctx, startBlock, sysErr)
 }
 
 func (c *EVMChain) Write(msg []*types.Message) error {
