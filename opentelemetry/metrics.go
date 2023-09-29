@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ChainSafe/sygma-core/relayer/message"
+	"github.com/ChainSafe/sygma-core/types"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/metric"
@@ -133,7 +133,7 @@ func NewRelayerMetrics(meter metric.Meter, attributes ...attribute.KeyValue) (*R
 
 // TrackDepositMessage extracts metrics from deposit message and sends
 // them to OpenTelemetry collector
-func (t *RelayerMetrics) TrackDepositMessage(m *message.Message) {
+func (t *RelayerMetrics) TrackDepositMessage(m *types.Message) {
 	t.DepositEventCount.Add(context.Background(), 1, t.Opts, api.WithAttributes(attribute.Int64("source", int64(m.Source))))
 
 	t.lock.Lock()
@@ -141,7 +141,7 @@ func (t *RelayerMetrics) TrackDepositMessage(m *message.Message) {
 	t.MessageEventTime[m.ID()] = time.Now()
 }
 
-func (t *RelayerMetrics) TrackExecutionError(m *message.Message) {
+func (t *RelayerMetrics) TrackExecutionError(m *types.Message) {
 	t.ExecutionErrorCount.Add(context.Background(), 1, t.Opts, api.WithAttributes(attribute.Int64("destination", int64(m.Source))))
 
 	t.lock.Lock()
@@ -149,7 +149,7 @@ func (t *RelayerMetrics) TrackExecutionError(m *message.Message) {
 	delete(t.MessageEventTime, m.ID())
 }
 
-func (t *RelayerMetrics) TrackSuccessfulExecutionLatency(m *message.Message) {
+func (t *RelayerMetrics) TrackSuccessfulExecutionLatency(m *types.Message) {
 	executionLatency := time.Since(t.MessageEventTime[m.ID()]).Milliseconds() / 1000
 	t.ExecutionLatency.Record(context.Background(), executionLatency)
 	t.ExecutionLatencyPerRoute.Record(
@@ -165,7 +165,7 @@ func (t *RelayerMetrics) TrackSuccessfulExecutionLatency(m *message.Message) {
 	delete(t.MessageEventTime, m.ID())
 }
 
-func (t *RelayerMetrics) TrackSuccessfulExecution(m *message.Message) {
+func (t *RelayerMetrics) TrackSuccessfulExecution(m *types.Message) {
 	executionLatency := time.Since(t.MessageEventTime[m.ID()]).Milliseconds() / 1000
 	t.ExecutionLatency.Record(context.Background(), executionLatency)
 	t.ExecutionLatencyPerRoute.Record(

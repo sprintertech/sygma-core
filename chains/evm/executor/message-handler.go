@@ -3,8 +3,6 @@ package executor
 import (
 	"fmt"
 
-	"github.com/ChainSafe/sygma-core/relayer/message"
-	"github.com/ChainSafe/sygma-core/relayer/proposal"
 	"github.com/ChainSafe/sygma-core/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog/log"
@@ -15,7 +13,7 @@ type HandlerMatcher interface {
 	ContractAddress() *common.Address
 }
 
-type MessageHandlerFunc func(m *message.Message, handlerAddr, bridgeAddress common.Address) (*proposal.Proposal, error)
+type MessageHandlerFunc func(m *types.Message, handlerAddr, bridgeAddress common.Address) (*types.Proposal, error)
 
 // NewEVMMessageHandler creates an instance of EVMMessageHandler that contains
 // message handler functions for converting deposit message into a chain specific
@@ -31,7 +29,7 @@ type EVMMessageHandler struct {
 	handlers       map[common.Address]MessageHandlerFunc
 }
 
-func (mh *EVMMessageHandler) HandleMessage(m *message.Message) (*proposal.Proposal, error) {
+func (mh *EVMMessageHandler) HandleMessage(m *types.Message) (*types.Proposal, error) {
 	// Matching resource ID with handler.
 	addr, err := mh.handlerMatcher.GetHandlerAddressForResourceID(m.ResourceId)
 	if err != nil {

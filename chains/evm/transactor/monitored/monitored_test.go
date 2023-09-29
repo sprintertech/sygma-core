@@ -73,7 +73,7 @@ func (s *TransactorTestSuite) TestTransactor_SignAndSend_Fail() {
 	s.mockContractCallerDispatcherClient.EXPECT().UnlockNonce()
 
 	t := monitored.NewMonitoredTransactor(
-		transactionNewTransaction,
+		transaction.NewTransaction,
 		s.mockGasPricer,
 		s.mockContractCallerDispatcherClient,
 		big.NewInt(1000),

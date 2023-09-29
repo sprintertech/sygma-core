@@ -8,7 +8,6 @@ import (
 	"github.com/ChainSafe/sygma-core/chains/evm/events"
 	"github.com/ChainSafe/sygma-core/chains/evm/listener"
 	mock_listener "github.com/ChainSafe/sygma-core/chains/evm/listener/mock"
-	"github.com/ChainSafe/sygma-core/relayer/message"
 	"github.com/ChainSafe/sygma-core/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
@@ -32,13 +31,13 @@ func (s *DepositHandlerTestSuite) SetupTest() {
 	s.domainID = 1
 	s.mockEventListener = mock_listener.NewMockEventListener(ctrl)
 	s.mockDepositHandler = mock_listener.NewMockDepositHandler(ctrl)
-	s.depositEventHandler = listener.NewDepositEventHandler(s.mockEventListener, s.mockDepositHandler, common.Address{}, s.domainID, make(chan []*message.Message))
+	s.depositEventHandler = listener.NewDepositEventHandler(s.mockEventListener, s.mockDepositHandler, common.Address{}, s.domainID, make(chan []*types.Message))
 }
 
 func (s *DepositHandlerTestSuite) Test_FetchDepositFails() {
 	s.mockEventListener.EXPECT().FetchDeposits(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return([]*events.Deposit{}, fmt.Errorf("error"))
 
-	msgChan := make(chan []*message.Message, 1)
+	msgChan := make(chan []*types.Message, 1)
 	err := s.depositEventHandler.HandleEvent(big.NewInt(0), big.NewInt(5))
 
 	s.NotNil(err)
@@ -69,7 +68,7 @@ func (s *DepositHandlerTestSuite) Test_HandleDepositFails_ExecutionContinue() {
 		d1.ResourceID,
 		d1.Data,
 		d1.HandlerResponse,
-	).Return(&message.Message{}, fmt.Errorf("error"))
+	).Return(&types.Message{}, fmt.Errorf("error"))
 	s.mockDepositHandler.EXPECT().HandleDeposit(
 		s.domainID,
 		d2.DestinationDomainID,
@@ -78,16 +77,16 @@ func (s *DepositHandlerTestSuite) Test_HandleDepositFails_ExecutionContinue() {
 		d2.Data,
 		d2.HandlerResponse,
 	).Return(
-		&message.Message{DepositNonce: 2},
+		&types.Message{DepositNonce: 2},
 		nil,
 	)
 
-	msgChan := make(chan []*message.Message, 2)
+	msgChan := make(chan []*types.Message, 2)
 	err := s.depositEventHandler.HandleEvent(big.NewInt(0), big.NewInt(5))
 	msgs := <-msgChan
 
 	s.Nil(err)
-	s.Equal(msgs, []*message.Message{{DepositNonce: 2}})
+	s.Equal(msgs, []*types.Message{{DepositNonce: 2}})
 }
 
 func (s *DepositHandlerTestSuite) Test_HandleDepositPanis_ExecutionContinues() {
@@ -125,16 +124,16 @@ func (s *DepositHandlerTestSuite) Test_HandleDepositPanis_ExecutionContinues() {
 		d2.Data,
 		d2.HandlerResponse,
 	).Return(
-		&message.Message{DepositNonce: 2},
+		&types.Message{DepositNonce: 2},
 		nil,
 	)
 
-	msgChan := make(chan []*message.Message, 2)
+	msgChan := make(chan []*types.Message, 2)
 	err := s.depositEventHandler.HandleEvent(big.NewInt(0), big.NewInt(5))
 	msgs := <-msgChan
 
 	s.Nil(err)
-	s.Equal(msgs, []*message.Message{{DepositNonce: 2}})
+	s.Equal(msgs, []*types.Message{{DepositNonce: 2}})
 }
 
 func (s *DepositHandlerTestSuite) Test_SuccessfulHandleDeposit() {
@@ -162,7 +161,7 @@ func (s *DepositHandlerTestSuite) Test_SuccessfulHandleDeposit() {
 		d1.Data,
 		d1.HandlerResponse,
 	).Return(
-		&message.Message{DepositNonce: 1},
+		&types.Message{DepositNonce: 1},
 		nil,
 	)
 	s.mockDepositHandler.EXPECT().HandleDeposit(
@@ -173,14 +172,14 @@ func (s *DepositHandlerTestSuite) Test_SuccessfulHandleDeposit() {
 		d2.Data,
 		d2.HandlerResponse,
 	).Return(
-		&message.Message{DepositNonce: 2},
+		&types.Message{DepositNonce: 2},
 		nil,
 	)
 
-	msgChan := make(chan []*message.Message, 2)
+	msgChan := make(chan []*types.Message, 2)
 	err := s.depositEventHandler.HandleEvent(big.NewInt(0), big.NewInt(5))
 	msgs := <-msgChan
 
 	s.Nil(err)
-	s.Equal(msgs, []*message.Message{{DepositNonce: 1}, {DepositNonce: 2}})
+	s.Equal(msgs, []*types.Message{{DepositNonce: 1}, {DepositNonce: 2}})
 }

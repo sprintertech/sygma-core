@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	mock_calls "github.com/ChainSafe/sygma-core/chains/evm/mock"
+	"github.com/ChainSafe/sygma-core/chains/evm/transaction"
 	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
 	mock_transactor "github.com/ChainSafe/sygma-core/chains/evm/transactor/mock"
 	"github.com/ChainSafe/sygma-core/chains/evm/transactor/signAndSend"
@@ -46,7 +47,7 @@ func (s *TransactorTestSuite) TestTransactor_SignAndSend_Success() {
 	s.mockContractCallerDispatcherClient.EXPECT().UnsafeIncreaseNonce().Return(nil)
 	s.mockContractCallerDispatcherClient.EXPECT().UnlockNonce()
 
-	txFabric := transactionNewTransaction
+	txFabric := transaction.NewTransaction
 	var trans = signAndSend.NewSignAndSendTransactor(
 		txFabric,
 		s.mockGasPricer,

@@ -6,7 +6,6 @@ import (
 	"math/big"
 
 	"github.com/ChainSafe/sygma-core/chains/evm/events"
-	"github.com/ChainSafe/sygma-core/relayer/message"
 	"github.com/ChainSafe/sygma-core/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog/log"
@@ -17,7 +16,7 @@ type EventListener interface {
 }
 
 type DepositHandler interface {
-	HandleDeposit(sourceID, destID uint8, nonce uint64, resourceID types.ResourceID, calldata, handlerResponse []byte) (*message.Message, error)
+	HandleDeposit(sourceID, destID uint8, nonce uint64, resourceID types.ResourceID, calldata, handlerResponse []byte) (*types.Message, error)
 }
 
 type DepositEventHandler struct {
@@ -25,11 +24,11 @@ type DepositEventHandler struct {
 	depositHandler DepositHandler
 
 	bridgeAddress common.Address
-	msgChan       chan []*message.Message
+	msgChan       chan []*types.Message
 	domainID      uint8
 }
 
-func NewDepositEventHandler(eventListener EventListener, depositHandler DepositHandler, bridgeAddress common.Address, domainID uint8, msgChan chan []*message.Message) *DepositEventHandler {
+func NewDepositEventHandler(eventListener EventListener, depositHandler DepositHandler, bridgeAddress common.Address, domainID uint8, msgChan chan []*types.Message) *DepositEventHandler {
 	return &DepositEventHandler{
 		eventListener:  eventListener,
 		depositHandler: depositHandler,
@@ -45,7 +44,7 @@ func (eh *DepositEventHandler) HandleEvent(startBlock *big.Int, endBlock *big.In
 		return fmt.Errorf("unable to fetch deposit events because of: %+v", err)
 	}
 
-	domainDeposits := make(map[uint8][]*message.Message)
+	domainDeposits := make(map[uint8][]*types.Message)
 	for _, d := range deposits {
 		func(d *events.Deposit) {
 			defer func() {
@@ -66,7 +65,7 @@ func (eh *DepositEventHandler) HandleEvent(startBlock *big.Int, endBlock *big.In
 	}
 
 	for _, deposits := range domainDeposits {
-		go func(d []*message.Message) {
+		go func(d []*types.Message) {
 			eh.msgChan <- d
 		}(deposits)
 	}

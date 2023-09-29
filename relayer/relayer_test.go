@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ChainSafe/sygma-core/relayer/message"
 	mock_relayer "github.com/ChainSafe/sygma-core/relayer/mock"
+	"github.com/ChainSafe/sygma-core/types"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 )
@@ -34,7 +34,7 @@ func (s *RouteTestSuite) TestLogsErrorIfDestinationDoesNotExist() {
 		metrics: s.mockMetrics,
 	}
 
-	relayer.route([]*message.Message{
+	relayer.route([]*types.Message{
 		{},
 	})
 }
@@ -48,7 +48,7 @@ func (s *RouteTestSuite) TestLogsErrorIfMessageProcessorReturnsError() {
 	)
 	relayer.addRelayedChain(s.mockRelayedChain)
 
-	relayer.route([]*message.Message{
+	relayer.route([]*types.Message{
 		{Destination: 1},
 	})
 }
@@ -64,7 +64,7 @@ func (s *RouteTestSuite) TestWriteFail() {
 	)
 	relayer.addRelayedChain(s.mockRelayedChain)
 
-	relayer.route([]*message.Message{
+	relayer.route([]*types.Message{
 		{Destination: 1},
 	})
 }
@@ -80,7 +80,7 @@ func (s *RouteTestSuite) TestWritesToDestChainIfMessageValid() {
 	)
 	relayer.addRelayedChain(s.mockRelayedChain)
 
-	relayer.route([]*message.Message{
+	relayer.route([]*types.Message{
 		{Destination: 1},
 	})
 }

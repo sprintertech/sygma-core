@@ -1,11 +1,8 @@
-// The Licensed Work is (c) 2022 Sygma
-// SPDX-License-Identifier: LGPL-3.0-only
-
-package proposal
+package types
 
 import (
-	"github.com/ChainSafe/sygma-core/relayer/message"
-	"github.com/ChainSafe/sygma-core/types"
+	"github.com/ChainSafe/chainbridge-core/relayer/message"
+	"github.com/ChainSafe/chainbridge-core/types"
 )
 
 func NewProposal(source, destination uint8, depositNonce uint64, resourceId types.ResourceID, data []byte, metadata message.Metadata) *Proposal {

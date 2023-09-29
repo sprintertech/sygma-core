@@ -1,13 +1,10 @@
-// Copyright 2021 ChainSafe Systems
-// SPDX-License-Identifier: LGPL-3.0-only
-
-package message
+package types
 
 import (
 	"math/big"
 	"strconv"
 
-	"github.com/ChainSafe/sygma-core/types"
+	"github.com/ChainSafe/chainbridge-core/types"
 )
 
 type TransferType string
