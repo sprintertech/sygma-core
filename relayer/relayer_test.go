@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"testing"
 
-	mock_relayer "github.com/ChainSafe/sygma-core/relayer/mock"
+	"github.com/ChainSafe/sygma-core/mock"
 	"github.com/ChainSafe/sygma-core/types"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
 )
 
 type RouteTestSuite struct {
 	suite.Suite
-	mockRelayedChain *mock_relayer.MockRelayedChain
-	mockMetrics      *mock_relayer.MockDepositMeter
+	mockRelayedChain *mock.MockRelayedChain
+	mockMetrics      *mock.MockDepositMeter
 }
 
 func TestRunRouteTestSuite(t *testing.T) {
@@ -24,8 +24,8 @@ func (s *RouteTestSuite) SetupSuite()    {}
 func (s *RouteTestSuite) TearDownSuite() {}
 func (s *RouteTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
-	s.mockRelayedChain = mock_relayer.NewMockRelayedChain(gomockController)
-	s.mockMetrics = mock_relayer.NewMockDepositMeter(gomockController)
+	s.mockRelayedChain = mock.NewMockRelayedChain(gomockController)
+	s.mockMetrics = mock.NewMockDepositMeter(gomockController)
 }
 func (s *RouteTestSuite) TearDownTest() {}
 
@@ -39,22 +39,7 @@ func (s *RouteTestSuite) TestLogsErrorIfDestinationDoesNotExist() {
 	})
 }
 
-func (s *RouteTestSuite) TestLogsErrorIfMessageProcessorReturnsError() {
-	s.mockMetrics.EXPECT().TrackDepositMessage(gomock.Any())
-	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1))
-	relayer := NewRelayer(
-		[]RelayedChain{},
-		s.mockMetrics,
-	)
-	relayer.addRelayedChain(s.mockRelayedChain)
-
-	relayer.route([]*types.Message{
-		{Destination: 1},
-	})
-}
-
 func (s *RouteTestSuite) TestWriteFail() {
-	s.mockMetrics.EXPECT().TrackDepositMessage(gomock.Any())
 	s.mockMetrics.EXPECT().TrackExecutionError(gomock.Any())
 	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(3)
 	s.mockRelayedChain.EXPECT().Write(gomock.Any()).Return(fmt.Errorf("error"))
@@ -70,7 +55,6 @@ func (s *RouteTestSuite) TestWriteFail() {
 }
 
 func (s *RouteTestSuite) TestWritesToDestChainIfMessageValid() {
-	s.mockMetrics.EXPECT().TrackDepositMessage(gomock.Any())
 	s.mockMetrics.EXPECT().TrackSuccessfulExecutionLatency(gomock.Any())
 	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(2)
 	s.mockRelayedChain.EXPECT().Write(gomock.Any())

@@ -1,4 +1,4 @@
-package gaspricer
+package gas
 
 import (
 	"context"

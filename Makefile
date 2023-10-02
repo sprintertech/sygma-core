@@ -33,6 +33,9 @@ install-subkey:
 	cargo install --force --git https://github.com/paritytech/substrate subkey
 
 genmocks:
-	mockgen -destination=./mock/gas-pricer.go -source=./chains/evm/gaspricer/gas-pricer.go -package mock
+	mockgen -destination=./mock/client.go -source=./chains/evm/client/client.go -package mock
+	mockgen -destination=./mock/gas.go -source=./chains/evm/transactor/gas/gas-pricer.go -package mock
 	mockgen -destination=./mock/relayer.go -source=./relayer/relayer.go -package mock
 	mockgen -source=chains/evm/transactor/transact.go -destination=./mock/transact.go -package mock
+	mockgen -source=chains/evm/transactor/signAndSend/signAndSend.go -destination=./mock/signAndSend.go -package mock
+	mockgen -source=./store/store.go -destination=./mock/store.go -package mock

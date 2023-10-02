@@ -1,38 +1,35 @@
-package gaspricer
+package gas
 
 import (
 	"errors"
 	"math/big"
 	"testing"
 
-	mock_gaspricer "github.com/ChainSafe/sygma-core/chains/evm/gaspricer/mock"
-
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 
 	"github.com/stretchr/testify/suite"
+
+	"github.com/ChainSafe/sygma-core/mock"
 )
 
 type StaticGasPriceTestSuite struct {
 	suite.Suite
-	gasPricerMock *mock_gaspricer.MockGasPriceClient
+	gasPricerMock *mock.MockGasPriceClient
 }
 
 func TestRunTestSuite(t *testing.T) {
 	suite.Run(t, new(StaticGasPriceTestSuite))
 }
 
-func (s *StaticGasPriceTestSuite) SetupSuite()    {}
-func (s *StaticGasPriceTestSuite) TearDownSuite() {}
-func (s *StaticGasPriceTestSuite) SetupTest() {
+func (s *StaticGasPriceTestSuite) SetupSuite() {
 	gomockController := gomock.NewController(s.T())
-	s.gasPricerMock = mock_gaspricer.NewMockGasPriceClient(gomockController)
+	s.gasPricerMock = mock.NewMockGasPriceClient(gomockController)
 }
-func (s *StaticGasPriceTestSuite) TearDownTest() {}
 
 func (s *StaticGasPriceTestSuite) TestStaticGasPricerNoOpts() {
 	twentyGwei := big.NewInt(20000000000)
-	gpd := NewStaticGasPriceDeterminant(s.gasPricerMock, nil)
 	s.gasPricerMock.EXPECT().SuggestGasPrice(gomock.Any()).Return(twentyGwei, nil)
+	gpd := NewStaticGasPriceDeterminant(s.gasPricerMock, nil)
 	res, err := gpd.GasPrice(nil)
 	s.Nil(err)
 	s.Equal(len(res), 1)

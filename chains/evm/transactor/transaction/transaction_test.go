@@ -4,25 +4,24 @@ import (
 	"math/big"
 	"testing"
 
-	gaspricer "github.com/ChainSafe/sygma-core/chains/evm/gaspricer"
-	mock_gaspricer "github.com/ChainSafe/sygma-core/chains/evm/gaspricer/mock"
-	"github.com/ChainSafe/sygma-core/chains/evm/transaction"
+	"github.com/ChainSafe/sygma-core/chains/evm/transactor/gas"
+	"github.com/ChainSafe/sygma-core/chains/evm/transactor/transaction"
+	"github.com/ChainSafe/sygma-core/crypto/keystore"
+	"github.com/ChainSafe/sygma-core/mock"
 
 	"github.com/ethereum/go-ethereum/core/types"
 
-	"github.com/ChainSafe/sygma-core/keystore"
-
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
 )
 
 var aliceKp = keystore.TestKeyRing.EthereumKeys[keystore.AliceKey]
 
 type EVMTxTestSuite struct {
 	suite.Suite
-	client *mock_gaspricer.MockLondonGasClient
+	client *mock.MockLondonGasClient
 }
 
 func TestRunTestSuite(t *testing.T) {
@@ -33,14 +32,14 @@ func (s *EVMTxTestSuite) SetupSuite()    {}
 func (s *EVMTxTestSuite) TearDownSuite() {}
 func (s *EVMTxTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
-	s.client = mock_gaspricer.NewMockLondonGasClient(gomockController)
+	s.client = mock.NewMockLondonGasClient(gomockController)
 }
 func (s *EVMTxTestSuite) TearDownTest() {}
 
 func (s *EVMTxTestSuite) TestNewTransactionWithStaticGasPricer() {
 	s.client.EXPECT().SuggestGasPrice(gomock.Any()).Return(big.NewInt(1000), nil)
 	txFabric := transaction.NewTransaction
-	gasPriceClient := gaspricer.NewStaticGasPriceDeterminant(s.client, nil)
+	gasPriceClient := gas.NewStaticGasPriceDeterminant(s.client, nil)
 	gp, err := gasPriceClient.GasPrice(nil)
 	s.Nil(err)
 	tx, err := txFabric(1, &common.Address{}, big.NewInt(0), 10000, gp, []byte{})
@@ -57,7 +56,7 @@ func (s *EVMTxTestSuite) TestNewTransactionWithLondonGasPricer() {
 	s.client.EXPECT().BaseFee().Return(big.NewInt(1000), nil)
 	s.client.EXPECT().SuggestGasTipCap(gomock.Any()).Return(big.NewInt(1000), nil)
 	txFabric := transaction.NewTransaction
-	gasPriceClient := gaspricer.NewLondonGasPriceClient(s.client, nil)
+	gasPriceClient := gas.NewLondonGasPriceClient(s.client, nil)
 	gp, err := gasPriceClient.GasPrice(nil)
 	s.Nil(err)
 	tx, err := txFabric(1, &common.Address{}, big.NewInt(0), 10000, gp, []byte{})

@@ -9,7 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/rs/zerolog/log"
 )
 
@@ -107,27 +106,4 @@ func (c *Contract) CallContract(method string, args ...interface{}) ([]interface
 		Str("contract", c.contractAddress.String()).
 		Msgf("method %s called", method)
 	return c.UnpackResult(method, out)
-}
-
-func (c *Contract) DeployContract(params ...interface{}) (common.Address, error) {
-	input, err := c.PackMethod("", params...)
-	if err != nil {
-		return common.Address{}, err
-	}
-	opts := transactor.TransactOptions{GasLimit: DefaultDeployGasLimit}
-	hash, err := c.Transact(nil, append(c.bytecode, input...), opts)
-	if err != nil {
-		return common.Address{}, err
-	}
-	tx, _, err := c.client.GetTransactionByHash(*hash)
-	if err != nil {
-		return common.Address{}, err
-	}
-	address := crypto.CreateAddress(c.client.From(), tx.Nonce())
-	c.contractAddress = address
-	log.Debug().
-		Str("txHash", hash.String()).
-		Str("deployedAddress", address.String()).
-		Msgf("successful contract deployment")
-	return address, nil
 }
