@@ -66,7 +66,7 @@ func (s *MessageHandlerTestSuite) TestSuccesfullyRegisterFungibleTransferMessage
 
 	depositMessageHandler := executor.NewSubstrateMessageHandler()
 	// Register FungibleTransferMessageHandler function
-	depositMessageHandler.RegisterMessageHandler("fungible", ExampleMessageHandler)
+	depositMessageHandler.RegisterMessageHandler("fungible", FungibleMessageHandler)
 	prop1, err1 := depositMessageHandler.HandleMessage(messageData)
 	s.Nil(err1)
 	s.NotNil(prop1)
@@ -77,7 +77,7 @@ func (s *MessageHandlerTestSuite) TestSuccesfullyRegisterFungibleTransferMessage
 	s.NotNil(err2)
 }
 
-func ExampleMessageHandler(m *types.Message) (*types.Proposal, error) {
+func FungibleMessageHandler(m *types.Message) (*types.Proposal, error) {
 	if len(m.Payload) != 2 {
 		return nil, errors.New("malformed payload. Len  of payload should be 2")
 	}
