@@ -6,7 +6,7 @@ import (
 
 	"github.com/ChainSafe/sygma-core/chains/evm/transactor/gas"
 	"github.com/ChainSafe/sygma-core/chains/evm/transactor/transaction"
-	"github.com/ChainSafe/sygma-core/crypto/keystore"
+	"github.com/ChainSafe/sygma-core/crypto/secp256k1"
 	"github.com/ChainSafe/sygma-core/mock"
 
 	"github.com/ethereum/go-ethereum/core/types"
@@ -17,7 +17,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-var aliceKp = keystore.TestKeyRing.EthereumKeys[keystore.AliceKey]
+var aliceKp, _ = secp256k1.NewKeypairFromString("b1370fac45517e19e27e16a2a31da07b9775d3a3bceb77a78f790f99655aa668")
 
 type EVMTxTestSuite struct {
 	suite.Suite
