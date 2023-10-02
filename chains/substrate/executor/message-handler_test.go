@@ -12,8 +12,8 @@ import (
 
 	"github.com/ChainSafe/sygma-core/chains/substrate/executor"
 	"github.com/ChainSafe/sygma-core/types"
-	"github.com/centrifuge/go-substrate-rpc-client/signature"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	substrateTypes "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/ethereum/go-ethereum/common"
 
