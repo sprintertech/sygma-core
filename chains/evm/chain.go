@@ -5,73 +5,57 @@ package evm
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 
 	"github.com/ChainSafe/sygma-core/store"
 	"github.com/ChainSafe/sygma-core/types"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 type EventListener interface {
-	ListenToEvents(ctx context.Context, startBlock *big.Int, errChan chan<- error)
+	ListenToEvents(ctx context.Context, startBlock *big.Int)
 }
 
 type ProposalExecutor interface {
-	Execute(message *types.Message) error
+	Execute(messages []*types.Message) error
 }
 
 // EVMChain is struct that aggregates all data required for
 type EVMChain struct {
 	listener   EventListener
-	writer     ProposalExecutor
+	executor   ProposalExecutor
 	blockstore *store.BlockStore
 
-	domainID    uint8
-	startBlock  *big.Int
-	freshStart  bool
-	latestBlock bool
+	domainID   uint8
+	startBlock *big.Int
+
+	logger zerolog.Logger
 }
 
-func NewEVMChain(listener EventListener, writer ProposalExecutor, blockstore *store.BlockStore, domainID uint8, startBlock *big.Int, latestBlock bool, freshStart bool) *EVMChain {
+func NewEVMChain(listener EventListener, executor ProposalExecutor, blockstore *store.BlockStore, domainID uint8, startBlock *big.Int) *EVMChain {
 	return &EVMChain{
-		listener:    listener,
-		writer:      writer,
-		blockstore:  blockstore,
-		domainID:    domainID,
-		startBlock:  startBlock,
-		latestBlock: latestBlock,
-		freshStart:  freshStart,
+		listener:   listener,
+		executor:   executor,
+		blockstore: blockstore,
+		domainID:   domainID,
+		startBlock: startBlock,
+		logger:     log.With().Uint8("domainID", domainID).Logger(),
 	}
 }
 
 // PollEvents is the goroutine that polls blocks and searches Deposit events in them.
 // Events are then sent to eventsChan.
-func (c *EVMChain) PollEvents(ctx context.Context, sysErr chan<- error) {
-	log.Info().Msg("Polling Blocks...")
-
-	startBlock, err := c.blockstore.GetStartBlock(
-		c.domainID,
-		c.startBlock,
-		c.latestBlock,
-		c.freshStart,
-	)
-	if err != nil {
-		sysErr <- fmt.Errorf("error %w on getting last stored block", err)
-		return
-	}
-
-	go c.listener.ListenToEvents(ctx, startBlock, sysErr)
+func (c *EVMChain) PollEvents(ctx context.Context) {
+	c.logger.Info().Str("startBlock", c.startBlock.String()).Msg("Polling Blocks...")
+	go c.listener.ListenToEvents(ctx, c.startBlock)
 }
 
-func (c *EVMChain) Write(msg []*types.Message) error {
-	for _, msg := range msg {
-		go func(msg *types.Message) {
-			err := c.writer.Execute(msg)
-			if err != nil {
-				log.Err(err).Msgf("Failed writing message %v", msg)
-			}
-		}(msg)
+func (c *EVMChain) Write(msgs []*types.Message) error {
+	err := c.executor.Execute(msgs)
+	if err != nil {
+		c.logger.Err(err).Msgf("error writing messages %+v on network %d", msgs, c.DomainID())
+		return err
 	}
 
 	return nil

@@ -57,7 +57,7 @@ Fork the repository, make changes and open a PR to the `main` branch of the repo
 A great way to contribute to the project is to send a detailed report when you encounter an issue. We always appreciate a well-written, thorough bug report, and will thank you for it!
 
 When reporting issues, always include:
- - chainbridge-core version
+ - sygma-core version
  - modules used
  - logs (don't forget to remove sensitive data)
  - tx hashes related to issue (if applicable)
