@@ -15,7 +15,7 @@ import (
 type BlockStoreTestSuite struct {
 	suite.Suite
 	blockStore           *store.BlockStore
-	keyValueReaderWriter *mock.NewMockKeyValueReaderWriter
+	keyValueReaderWriter *mock.MockKeyValueReaderWriter
 }
 
 func TestRunBlockStoreTestSuite(t *testing.T) {
