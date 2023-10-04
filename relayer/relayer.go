@@ -10,36 +10,28 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type DepositMeter interface {
-	TrackDepositMessage(m *types.Message)
-	TrackExecutionError(m *types.Message)
-	TrackSuccessfulExecutionLatency(m *types.Message)
-}
-
 type RelayedChain interface {
 	PollEvents(ctx context.Context)
-	Write(messages []*types.Message) error
+	ReceiveMessages(msgs []*types.Message) ([]*types.Proposal, error)
+	Write(proposals []*types.Proposal) error
 	DomainID() uint8
 }
 
-func NewRelayer(chains []RelayedChain, metrics DepositMeter) *Relayer {
-	return &Relayer{relayedChains: chains, metrics: metrics}
+func NewRelayer(chains map[uint8]RelayedChain) *Relayer {
+	return &Relayer{relayedChains: chains}
 }
 
 type Relayer struct {
-	metrics       DepositMeter
-	relayedChains []RelayedChain
-	registry      map[uint8]RelayedChain
+	relayedChains map[uint8]RelayedChain
 }
 
 // Start function starts the relayer. Relayer routine is starting all the chains
 // and passing them with a channel that accepts unified cross chain message format
 func (r *Relayer) Start(ctx context.Context, msgChan chan []*types.Message) {
-	log.Debug().Msgf("Starting relayer")
+	log.Info().Msgf("Starting relayer")
 
 	for _, c := range r.relayedChains {
 		log.Debug().Msgf("Starting chain %v", c.DomainID())
-		r.addRelayedChain(c)
 		go c.PollEvents(ctx)
 	}
 
@@ -56,31 +48,25 @@ func (r *Relayer) Start(ctx context.Context, msgChan chan []*types.Message) {
 
 // Route function runs destination writer by mapping DestinationID from message to registered writer.
 func (r *Relayer) route(msgs []*types.Message) {
-	destChain, ok := r.registry[msgs[0].Destination]
+	destChain, ok := r.relayedChains[msgs[0].Destination]
 	if !ok {
-		log.Error().Msgf("no resolver for destID %v to send message registered", msgs[0].Destination)
+		log.Error().Uint8("domainID", destChain.DomainID()).Msgf("no resolver for destID %v to send message registered", msgs[0].Destination)
 		return
 	}
 
-	log.Debug().Msgf("Sending messages %+v to destination %v", msgs, destChain.DomainID())
-	err := destChain.Write(msgs)
+	props, err := destChain.ReceiveMessages(msgs)
 	if err != nil {
-		for _, m := range msgs {
-			log.Err(err).Msgf("Failed sending messages %+v to destination %v", m, destChain.DomainID())
-			r.metrics.TrackExecutionError(m)
-		}
+		log.Err(err).Uint8("domainID", destChain.DomainID()).Msgf("Failed receiving message")
 		return
 	}
 
-	for _, m := range msgs {
-		r.metrics.TrackSuccessfulExecutionLatency(m)
+	if len(props) == 0 {
+		return
 	}
-}
 
-func (r *Relayer) addRelayedChain(c RelayedChain) {
-	if r.registry == nil {
-		r.registry = make(map[uint8]RelayedChain)
+	err = destChain.Write(props)
+	if err != nil {
+		log.Err(err).Uint8("domainID", destChain.DomainID()).Msgf("Failed writing message")
+		return
 	}
-	domainID := c.DomainID()
-	r.registry[domainID] = c
 }
