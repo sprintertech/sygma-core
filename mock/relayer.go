@@ -113,6 +113,7 @@ func (mr *MockRelayedChainMockRecorder) DomainID() *gomock.Call {
 }
 
 // PollEvents mocks base method.
+<<<<<<< HEAD
 func (m *MockRelayedChain) PollEvents(ctx context.Context) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "PollEvents", ctx)
@@ -122,6 +123,17 @@ func (m *MockRelayedChain) PollEvents(ctx context.Context) {
 func (mr *MockRelayedChainMockRecorder) PollEvents(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PollEvents", reflect.TypeOf((*MockRelayedChain)(nil).PollEvents), ctx)
+=======
+func (m *MockRelayedChain) PollEvents(ctx context.Context, sysErr chan<- error) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "PollEvents", ctx, sysErr)
+}
+
+// PollEvents indicates an expected call of PollEvents.
+func (mr *MockRelayedChainMockRecorder) PollEvents(ctx, sysErr any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PollEvents", reflect.TypeOf((*MockRelayedChain)(nil).PollEvents), ctx, sysErr)
+>>>>>>> main
 }
 
 // Write mocks base method.
