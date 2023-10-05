@@ -6,14 +6,15 @@ package relayer
 import (
 	"context"
 
-	"github.com/ChainSafe/sygma-core/types"
+	"github.com/ChainSafe/sygma-core/relayer/message"
+	"github.com/ChainSafe/sygma-core/relayer/proposal"
 	"github.com/rs/zerolog/log"
 )
 
 type RelayedChain interface {
 	PollEvents(ctx context.Context)
-	ReceiveMessage(m *types.Message) (*types.Proposal, error)
-	Write(proposals []*types.Proposal) error
+	ReceiveMessage(m *message.Message) (*proposal.Proposal, error)
+	Write(proposals []*proposal.Proposal) error
 	DomainID() uint8
 }
 
@@ -27,7 +28,7 @@ type Relayer struct {
 
 // Start function starts the relayer. Relayer routine is starting all the chains
 // and passing them with a channel that accepts unified cross chain message format
-func (r *Relayer) Start(ctx context.Context, msgChan chan []*types.Message) {
+func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message) {
 	log.Info().Msgf("Starting relayer")
 
 	for _, c := range r.relayedChains {
@@ -47,14 +48,14 @@ func (r *Relayer) Start(ctx context.Context, msgChan chan []*types.Message) {
 }
 
 // Route function runs destination writer by mapping DestinationID from message to registered writer.
-func (r *Relayer) route(msgs []*types.Message) {
+func (r *Relayer) route(msgs []*message.Message) {
 	destChain, ok := r.relayedChains[msgs[0].Destination]
 	if !ok {
 		log.Error().Uint8("domainID", destChain.DomainID()).Msgf("no resolver for destID %v to send message registered", msgs[0].Destination)
 		return
 	}
 
-	props := make([]*types.Proposal, 0)
+	props := make([]*proposal.Proposal, 0)
 	for _, m := range msgs {
 		prop, err := destChain.ReceiveMessage(m)
 		if err != nil {

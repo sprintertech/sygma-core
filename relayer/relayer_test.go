@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"github.com/ChainSafe/sygma-core/mock"
-	"github.com/ChainSafe/sygma-core/types"
+	"github.com/ChainSafe/sygma-core/relayer/message"
+	"github.com/ChainSafe/sygma-core/relayer/proposal"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
 )
@@ -45,8 +46,8 @@ func (s *RouteTestSuite) TestStartListensOnChannel() {
 		chains,
 	)
 
-	msgChan := make(chan []*types.Message, 1)
-	msgChan <- []*types.Message{
+	msgChan := make(chan []*message.Message, 1)
+	msgChan <- []*message.Message{
 		{Destination: 1},
 	}
 	relayer.Start(ctx, msgChan)
@@ -62,7 +63,7 @@ func (s *RouteTestSuite) TestReceiveMessageFails() {
 		chains,
 	)
 
-	relayer.route([]*types.Message{
+	relayer.route([]*message.Message{
 		{Destination: 1},
 	})
 }
@@ -75,14 +76,14 @@ func (s *RouteTestSuite) TestAvoidWriteWithoutProposals() {
 		chains,
 	)
 
-	relayer.route([]*types.Message{
+	relayer.route([]*message.Message{
 		{Destination: 1},
 	})
 }
 
 func (s *RouteTestSuite) TestWriteFails() {
-	props := make([]*types.Proposal, 1)
-	prop := &types.Proposal{}
+	props := make([]*proposal.Proposal, 1)
+	prop := &proposal.Proposal{}
 	props[0] = prop
 	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(prop, nil)
 	s.mockRelayedChain.EXPECT().Write(props).Return(fmt.Errorf("error"))
@@ -93,14 +94,14 @@ func (s *RouteTestSuite) TestWriteFails() {
 		chains,
 	)
 
-	relayer.route([]*types.Message{
+	relayer.route([]*message.Message{
 		{Destination: 1},
 	})
 }
 
 func (s *RouteTestSuite) TestWritesToChain() {
-	props := make([]*types.Proposal, 1)
-	prop := &types.Proposal{}
+	props := make([]*proposal.Proposal, 1)
+	prop := &proposal.Proposal{}
 	props[0] = prop
 	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(prop, nil)
 	s.mockRelayedChain.EXPECT().Write(props).Return(nil)
@@ -110,7 +111,7 @@ func (s *RouteTestSuite) TestWritesToChain() {
 		chains,
 	)
 
-	relayer.route([]*types.Message{
+	relayer.route([]*message.Message{
 		{Destination: 1},
 	})
 }

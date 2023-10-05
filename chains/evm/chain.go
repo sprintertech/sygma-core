@@ -7,8 +7,8 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ChainSafe/sygma-core/store"
-	"github.com/ChainSafe/sygma-core/types"
+	"github.com/ChainSafe/sygma-core/relayer/message"
+	"github.com/ChainSafe/sygma-core/relayer/proposal"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -18,11 +18,11 @@ type EventListener interface {
 }
 
 type ProposalExecutor interface {
-	Execute(props []*types.Proposal) error
+	Execute(props []*proposal.Proposal) error
 }
 
 type MessageHandler interface {
-	HandleMessage(m *types.Message) (*types.Proposal, error)
+	HandleMessage(m *message.Message) (*proposal.Proposal, error)
 }
 
 // EVMChain is struct that aggregates all data required for
@@ -31,19 +31,16 @@ type EVMChain struct {
 	executor       ProposalExecutor
 	messageHandler MessageHandler
 
-	blockstore *store.BlockStore
-
 	domainID   uint8
 	startBlock *big.Int
 
 	logger zerolog.Logger
 }
 
-func NewEVMChain(listener EventListener, messageHandler MessageHandler, executor ProposalExecutor, blockstore *store.BlockStore, domainID uint8, startBlock *big.Int) *EVMChain {
+func NewEVMChain(listener EventListener, messageHandler MessageHandler, executor ProposalExecutor, domainID uint8, startBlock *big.Int) *EVMChain {
 	return &EVMChain{
 		listener:       listener,
 		executor:       executor,
-		blockstore:     blockstore,
 		domainID:       domainID,
 		startBlock:     startBlock,
 		messageHandler: messageHandler,
@@ -58,11 +55,11 @@ func (c *EVMChain) PollEvents(ctx context.Context) {
 	go c.listener.ListenToEvents(ctx, c.startBlock)
 }
 
-func (c *EVMChain) ReceiveMessage(m *types.Message) (*types.Proposal, error) {
+func (c *EVMChain) ReceiveMessage(m *message.Message) (*proposal.Proposal, error) {
 	return c.messageHandler.HandleMessage(m)
 }
 
-func (c *EVMChain) Write(props []*types.Proposal) error {
+func (c *EVMChain) Write(props []*proposal.Proposal) error {
 	err := c.executor.Execute(props)
 	if err != nil {
 		c.logger.Err(err).Msgf("error writing proposals %+v on network %d", props, c.DomainID())

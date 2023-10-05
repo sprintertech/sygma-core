@@ -12,7 +12,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	types "github.com/ChainSafe/sygma-core/types"
+	message "github.com/ChainSafe/sygma-core/relayer/message"
+	proposal "github.com/ChainSafe/sygma-core/relayer/proposal"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -66,10 +67,10 @@ func (mr *MockRelayedChainMockRecorder) PollEvents(ctx any) *gomock.Call {
 }
 
 // ReceiveMessage mocks base method.
-func (m_2 *MockRelayedChain) ReceiveMessage(m *types.Message) (*types.Proposal, error) {
+func (m_2 *MockRelayedChain) ReceiveMessage(m *message.Message) (*proposal.Proposal, error) {
 	m_2.ctrl.T.Helper()
 	ret := m_2.ctrl.Call(m_2, "ReceiveMessage", m)
-	ret0, _ := ret[0].(*types.Proposal)
+	ret0, _ := ret[0].(*proposal.Proposal)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -81,7 +82,7 @@ func (mr *MockRelayedChainMockRecorder) ReceiveMessage(m any) *gomock.Call {
 }
 
 // Write mocks base method.
-func (m *MockRelayedChain) Write(proposals []*types.Proposal) error {
+func (m *MockRelayedChain) Write(proposals []*proposal.Proposal) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Write", proposals)
 	ret0, _ := ret[0].(error)

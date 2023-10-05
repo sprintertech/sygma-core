@@ -1,4 +1,4 @@
-package types
+package message
 
 type MessageType string
 type Message struct {
