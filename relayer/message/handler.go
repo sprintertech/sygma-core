@@ -1,6 +1,10 @@
 package message
 
-import "github.com/ChainSafe/sygma-core/relayer/proposal"
+import (
+	"fmt"
+
+	"github.com/ChainSafe/sygma-core/relayer/proposal"
+)
 
 type Handler interface {
 	HandleMessage(m *Message) (*proposal.Proposal, error)
@@ -11,12 +15,18 @@ type MessageHandler struct {
 }
 
 func NewMessageHandler() *MessageHandler {
-	return &MessageHandler{}
+	return &MessageHandler{
+		handlers: make(map[MessageType]Handler),
+	}
 }
 
 // HandlerMessage calls associated handler for that message type and returns a proposal to be submitted on-chain
 func (h *MessageHandler) HandleMessage(m *Message) (*proposal.Proposal, error) {
-	return h.handlers[m.Type].HandleMessage(m)
+	mh, ok := h.handlers[m.Type]
+	if !ok {
+		return nil, fmt.Errorf("no handler found for type %s", m.Type)
+	}
+	return mh.HandleMessage(m)
 }
 
 // RegisterMessageHandler registers a message handler by associating a handler to a message type
