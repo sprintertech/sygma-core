@@ -12,8 +12,13 @@ import (
 )
 
 type RelayedChain interface {
+	// PollEvents starts listening for on-chain events
 	PollEvents(ctx context.Context)
+	// ReceiveMessage accepts the message from the source chain and converts it into
+	// a Proposal to be submitted on-chain
 	ReceiveMessage(m *message.Message) (*proposal.Proposal, error)
+	// Write submits proposals on-chain.
+	// If multiple proposals submitted they are expected to be able to be batched.
 	Write(proposals []*proposal.Proposal) error
 	DomainID() uint8
 }
@@ -26,8 +31,9 @@ type Relayer struct {
 	relayedChains map[uint8]RelayedChain
 }
 
-// Start function starts the relayer. Relayer routine is starting all the chains
-// and passing them with a channel that accepts unified cross chain message format
+// Start function starts polling events for each chain and listens to cross-chain messages.
+// If an array of messages is sent to the channel they are expected to be to the same destination and
+// able to be handled in batches.
 func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message) {
 	log.Info().Msgf("Starting relayer")
 
@@ -47,7 +53,7 @@ func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message) {
 	}
 }
 
-// Route function runs destination writer by mapping DestinationID from message to registered writer.
+// Route function routes the messages to the destination chain.
 func (r *Relayer) route(msgs []*message.Message) {
 	destChain, ok := r.relayedChains[msgs[0].Destination]
 	if !ok {

@@ -19,7 +19,7 @@ func (h *MessageHandler) HandleMessage(m *Message) (*proposal.Proposal, error) {
 	return h.handlers[m.Type].HandleMessage(m)
 }
 
-// RegisterMessageHandler registers an message handler by associating a handler to a message type
+// RegisterMessageHandler registers a message handler by associating a handler to a message type
 func (mh *MessageHandler) RegisterMessageHandler(t MessageType, h Handler) {
 	mh.handlers[t] = h
 }
