@@ -50,7 +50,7 @@ func (c *SubstrateChain) PollEvents(ctx context.Context) {
 }
 
 func (c *SubstrateChain) ReceiveMessage(m *message.Message) (*proposal.Proposal, error) {
-	return nil, nil
+	return c.messageHandler.HandleMessage(m)
 }
 
 func (c *SubstrateChain) Write(props []*proposal.Proposal) error {
