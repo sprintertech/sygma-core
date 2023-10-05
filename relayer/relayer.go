@@ -12,7 +12,7 @@ import (
 
 type RelayedChain interface {
 	PollEvents(ctx context.Context)
-	ReceiveMessages(msgs []*types.Message) ([]*types.Proposal, error)
+	ReceiveMessage(m *types.Message) (*types.Proposal, error)
 	Write(proposals []*types.Proposal) error
 	DomainID() uint8
 }
@@ -54,17 +54,22 @@ func (r *Relayer) route(msgs []*types.Message) {
 		return
 	}
 
-	props, err := destChain.ReceiveMessages(msgs)
-	if err != nil {
-		log.Err(err).Uint8("domainID", destChain.DomainID()).Msgf("Failed receiving message")
-		return
+	props := make([]*types.Proposal, 0)
+	for _, m := range msgs {
+		prop, err := destChain.ReceiveMessage(m)
+		if err != nil {
+			log.Err(err).Uint8("domainID", destChain.DomainID()).Msgf("Failed receiving message %+v", m)
+			continue
+		}
+		if prop != nil {
+			props = append(props, prop)
+		}
 	}
-
 	if len(props) == 0 {
 		return
 	}
 
-	err = destChain.Write(props)
+	err := destChain.Write(props)
 	if err != nil {
 		log.Err(err).Uint8("domainID", destChain.DomainID()).Msgf("Failed writing message")
 		return

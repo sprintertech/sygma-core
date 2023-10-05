@@ -12,7 +12,7 @@ import (
 )
 
 type BatchProposalExecutor interface {
-	Execute(msgs []*types.Message) error
+	Execute(props []*types.Proposal) error
 }
 
 type SubstrateChain struct {
@@ -49,10 +49,14 @@ func (c *SubstrateChain) PollEvents(ctx context.Context) {
 	go c.listener.ListenToEvents(ctx, c.startBlock)
 }
 
-func (c *SubstrateChain) Write(msgs []*types.Message) error {
-	err := c.executor.Execute(msgs)
+func (c *SubstrateChain) ReceiveMessages(msgs []*types.Message) ([]*types.Proposal, error) {
+	return []*types.Proposal{}, nil
+}
+
+func (c *SubstrateChain) Write(props []*types.Proposal) error {
+	err := c.executor.Execute(props)
 	if err != nil {
-		c.logger.Err(err).Msgf("error writing messages %+v on network %d", msgs, c.DomainID())
+		c.logger.Err(err).Msgf("error writing proposals %+v on network %d", props, c.DomainID())
 		return err
 	}
 

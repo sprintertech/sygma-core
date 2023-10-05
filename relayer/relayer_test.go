@@ -38,7 +38,7 @@ func (s *RouteTestSuite) TestStartListensOnChannel() {
 		cancel()
 		return 1
 	})
-	s.mockRelayedChain.EXPECT().ReceiveMessages(gomock.Any()).Return(make([]*types.Proposal, 0), fmt.Errorf("error"))
+	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(nil, fmt.Errorf("error"))
 	chains := make(map[uint8]RelayedChain)
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
@@ -55,7 +55,7 @@ func (s *RouteTestSuite) TestStartListensOnChannel() {
 
 func (s *RouteTestSuite) TestReceiveMessageFails() {
 	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(1)
-	s.mockRelayedChain.EXPECT().ReceiveMessages(gomock.Any()).Return(make([]*types.Proposal, 0), fmt.Errorf("error"))
+	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(nil, fmt.Errorf("error"))
 	chains := make(map[uint8]RelayedChain)
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
@@ -68,7 +68,7 @@ func (s *RouteTestSuite) TestReceiveMessageFails() {
 }
 
 func (s *RouteTestSuite) TestAvoidWriteWithoutProposals() {
-	s.mockRelayedChain.EXPECT().ReceiveMessages(gomock.Any()).Return(make([]*types.Proposal, 0), nil)
+	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(nil, nil)
 	chains := make(map[uint8]RelayedChain)
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
@@ -84,7 +84,7 @@ func (s *RouteTestSuite) TestWriteFails() {
 	props := make([]*types.Proposal, 1)
 	prop := &types.Proposal{}
 	props[0] = prop
-	s.mockRelayedChain.EXPECT().ReceiveMessages(gomock.Any()).Return(props, nil)
+	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(prop, nil)
 	s.mockRelayedChain.EXPECT().Write(props).Return(fmt.Errorf("error"))
 	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(1)
 	chains := make(map[uint8]RelayedChain)
@@ -102,7 +102,7 @@ func (s *RouteTestSuite) TestWritesToChain() {
 	props := make([]*types.Proposal, 1)
 	prop := &types.Proposal{}
 	props[0] = prop
-	s.mockRelayedChain.EXPECT().ReceiveMessages(gomock.Any()).Return(props, nil)
+	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(prop, nil)
 	s.mockRelayedChain.EXPECT().Write(props).Return(nil)
 	chains := make(map[uint8]RelayedChain)
 	chains[1] = s.mockRelayedChain

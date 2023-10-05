@@ -65,19 +65,19 @@ func (mr *MockRelayedChainMockRecorder) PollEvents(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PollEvents", reflect.TypeOf((*MockRelayedChain)(nil).PollEvents), ctx)
 }
 
-// ReceiveMessages mocks base method.
-func (m *MockRelayedChain) ReceiveMessages(msgs []*types.Message) ([]*types.Proposal, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ReceiveMessages", msgs)
-	ret0, _ := ret[0].([]*types.Proposal)
+// ReceiveMessage mocks base method.
+func (m_2 *MockRelayedChain) ReceiveMessage(m *types.Message) (*types.Proposal, error) {
+	m_2.ctrl.T.Helper()
+	ret := m_2.ctrl.Call(m_2, "ReceiveMessage", m)
+	ret0, _ := ret[0].(*types.Proposal)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ReceiveMessages indicates an expected call of ReceiveMessages.
-func (mr *MockRelayedChainMockRecorder) ReceiveMessages(msgs any) *gomock.Call {
+// ReceiveMessage indicates an expected call of ReceiveMessage.
+func (mr *MockRelayedChainMockRecorder) ReceiveMessage(m any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveMessages", reflect.TypeOf((*MockRelayedChain)(nil).ReceiveMessages), msgs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveMessage", reflect.TypeOf((*MockRelayedChain)(nil).ReceiveMessage), m)
 }
 
 // Write mocks base method.

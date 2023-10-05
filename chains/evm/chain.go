@@ -18,13 +18,19 @@ type EventListener interface {
 }
 
 type ProposalExecutor interface {
-	Execute(messages []*types.Message) error
+	Execute(props []*types.Proposal) error
+}
+
+type MessageHandler interface {
+	HandleMessage(m *types.Message) (*types.Proposal, error)
 }
 
 // EVMChain is struct that aggregates all data required for
 type EVMChain struct {
-	listener   EventListener
-	executor   ProposalExecutor
+	listener       EventListener
+	executor       ProposalExecutor
+	messageHandler MessageHandler
+
 	blockstore *store.BlockStore
 
 	domainID   uint8
@@ -33,14 +39,15 @@ type EVMChain struct {
 	logger zerolog.Logger
 }
 
-func NewEVMChain(listener EventListener, executor ProposalExecutor, blockstore *store.BlockStore, domainID uint8, startBlock *big.Int) *EVMChain {
+func NewEVMChain(listener EventListener, messageHandler MessageHandler, executor ProposalExecutor, blockstore *store.BlockStore, domainID uint8, startBlock *big.Int) *EVMChain {
 	return &EVMChain{
-		listener:   listener,
-		executor:   executor,
-		blockstore: blockstore,
-		domainID:   domainID,
-		startBlock: startBlock,
-		logger:     log.With().Uint8("domainID", domainID).Logger(),
+		listener:       listener,
+		executor:       executor,
+		blockstore:     blockstore,
+		domainID:       domainID,
+		startBlock:     startBlock,
+		messageHandler: messageHandler,
+		logger:         log.With().Uint8("domainID", domainID).Logger(),
 	}
 }
 
@@ -51,10 +58,14 @@ func (c *EVMChain) PollEvents(ctx context.Context) {
 	go c.listener.ListenToEvents(ctx, c.startBlock)
 }
 
-func (c *EVMChain) Write(msgs []*types.Message) error {
-	err := c.executor.Execute(msgs)
+func (c *EVMChain) ReceiveMessage(m *types.Message) (*types.Proposal, error) {
+	return c.messageHandler.HandleMessage(m)
+}
+
+func (c *EVMChain) Write(props []*types.Proposal) error {
+	err := c.executor.Execute(props)
 	if err != nil {
-		c.logger.Err(err).Msgf("error writing messages %+v on network %d", msgs, c.DomainID())
+		c.logger.Err(err).Msgf("error writing proposals %+v on network %d", props, c.DomainID())
 		return err
 	}
 
