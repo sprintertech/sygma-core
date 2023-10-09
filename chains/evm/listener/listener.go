@@ -67,7 +67,7 @@ func NewEVMListener(
 
 // ListenToEvents goes block by block of a network and executes event handlers that are
 // configured for the listener.
-func (l *EVMListener) ListenToEvents(ctx context.Context, startBlock *big.Int, errChn chan<- error) {
+func (l *EVMListener) ListenToEvents(ctx context.Context, startBlock *big.Int) {
 	endBlock := big.NewInt(0)
 	for {
 		select {
