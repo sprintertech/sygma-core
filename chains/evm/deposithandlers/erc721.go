@@ -7,20 +7,12 @@ import (
 	"github.com/ChainSafe/sygma-core/types"
 )
 
-type Erc721DepositHandler struct {
-	ArbitraryFunction arbitraryFunction
-	Config            interface{}
-}
+type Erc721DepositHandler struct{}
 
 // Erc721DepositHandler converts data pulled from ERC721 deposit event logs into message
 func (dh *Erc721DepositHandler) HandleDeposit(sourceID, destId uint8, nonce uint64, resourceID types.ResourceID, calldata, handlerResponse []byte) (*types.Message, error) {
 	if len(calldata) < 64 {
 		err := errors.New("invalid calldata length: less than 84 bytes")
-		return nil, err
-	}
-
-	err := dh.ArbitraryFunction(dh.Config)
-	if err != nil {
 		return nil, err
 	}
 

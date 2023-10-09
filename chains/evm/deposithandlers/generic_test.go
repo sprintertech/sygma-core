@@ -43,12 +43,8 @@ func (s *GenericHandlerTestSuite) TestGenericHandleEventIncorrectDataLen() {
 	}
 
 	sourceID := uint8(1)
-	conf := &Config{}
 
-	genericDepositHandler := deposithandlers.GenericDepositHandler{
-		ArbitraryFunction: testFunc,
-		Config:            conf,
-	}
+	genericDepositHandler := deposithandlers.GenericDepositHandler{}
 	message, err := genericDepositHandler.HandleDeposit(
 		sourceID,
 		depositLog.DestinationDomainID,
@@ -86,12 +82,8 @@ func (s *GenericHandlerTestSuite) TestGenericHandleEventEmptyMetadata() {
 			metadata,
 		},
 	}
-	conf := &Config{}
 
-	genericDepositHandler := deposithandlers.GenericDepositHandler{
-		ArbitraryFunction: testFunc,
-		Config:            conf,
-	}
+	genericDepositHandler := deposithandlers.GenericDepositHandler{}
 	message, err := genericDepositHandler.HandleDeposit(
 		sourceID,
 		depositLog.DestinationDomainID,
@@ -131,11 +123,7 @@ func (s *GenericHandlerTestSuite) TestGenericHandleEvent() {
 		},
 	}
 
-	conf := &Config{}
-	genericDepositHandler := deposithandlers.GenericDepositHandler{
-		ArbitraryFunction: testFunc,
-		Config:            conf,
-	}
+	genericDepositHandler := deposithandlers.GenericDepositHandler{}
 	message, err := genericDepositHandler.HandleDeposit(
 		sourceID,
 		depositLog.DestinationDomainID,
@@ -148,36 +136,4 @@ func (s *GenericHandlerTestSuite) TestGenericHandleEvent() {
 	s.Nil(err)
 	s.NotNil(message)
 	s.Equal(message, expected)
-}
-
-func (s *GenericHandlerTestSuite) TestGenericHandleEventArbitraryFunctionError() {
-	metadata := []byte("0xdeadbeef")
-	calldata := deposit.ConstructGenericDepositData(metadata)
-
-	depositLog := &eventhandlers.Deposit{
-		DestinationDomainID: 0,
-		ResourceID:          [32]byte{0},
-		DepositNonce:        1,
-		SenderAddress:       common.HexToAddress("0x4CEEf6139f00F9F4535Ad19640Ff7A0137708485"),
-		Data:                calldata,
-		HandlerResponse:     []byte{},
-	}
-
-	sourceID := uint8(1)
-
-	conf := &Config{}
-	genericDepositHandler := deposithandlers.GenericDepositHandler{
-		ArbitraryFunction: testErrFunc,
-		Config:            conf,
-	}
-	_, err := genericDepositHandler.HandleDeposit(
-		sourceID,
-		depositLog.DestinationDomainID,
-		depositLog.DepositNonce,
-		depositLog.ResourceID,
-		depositLog.Data,
-		depositLog.HandlerResponse,
-	)
-
-	s.NotNil(err)
 }

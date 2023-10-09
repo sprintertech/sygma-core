@@ -11,9 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-type arbitraryFunction func(Config interface{}) error
 type DepositHandlers map[common.Address]eventhandlers.DepositHandler
-type DepositHandlerFunc func(sourceID, destID uint8, nonce uint64, resourceID types.ResourceID, calldata, handlerResponse []byte) (*types.Message, error)
 type HandlerMatcher interface {
 	GetHandlerAddressForResourceID(resourceID types.ResourceID) (common.Address, error)
 }
@@ -43,16 +41,16 @@ func (e *ETHDepositHandler) HandleDeposit(sourceID, destID uint8, depositNonce u
 		return nil, err
 	}
 
-	return depositHandler(sourceID, destID, depositNonce, resourceID, calldata, handlerResponse)
+	return depositHandler.HandleDeposit(sourceID, destID, depositNonce, resourceID, calldata, handlerResponse)
 }
 
 // matchAddressWithHandlerFunc matches a handler address with an associated handler function
-func (e *ETHDepositHandler) matchAddressWithHandlerFunc(handlerAddress common.Address) (DepositHandlerFunc, error) {
+func (e *ETHDepositHandler) matchAddressWithHandlerFunc(handlerAddress common.Address) (eventhandlers.DepositHandler, error) {
 	hf, ok := e.depositHandlers[handlerAddress]
 	if !ok {
 		return nil, errors.New("no corresponding deposit handler for this address exists")
 	}
-	return hf.HandleDeposit, nil
+	return hf, nil
 }
 
 // RegisterDepositHandler registers an event handler by associating a handler function to a specified address
