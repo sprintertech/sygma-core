@@ -79,7 +79,7 @@ loop:
 		default:
 			head, err := l.client.LatestBlock()
 			if err != nil {
-				l.log.Error().Err(err).Msg("Unable to get latest block")
+				l.log.Warn().Err(err).Msg("Unable to get latest block")
 				time.Sleep(l.blockRetryInterval)
 				continue
 			}
