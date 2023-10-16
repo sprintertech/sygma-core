@@ -96,7 +96,7 @@ func (l *SubstrateListener) ListenToEvents(ctx context.Context, startBlock *big.
 				for _, handler := range l.eventHandlers {
 					err := handler.HandleEvents(evts)
 					if err != nil {
-						l.log.Error().Err(err).Msg("Error handling substrate events")
+						l.log.Warn().Err(err).Msg("Error handling substrate events")
 						continue
 					}
 				}

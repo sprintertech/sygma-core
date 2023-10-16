@@ -100,7 +100,7 @@ loop:
 			for _, handler := range l.eventHandlers {
 				err := handler.HandleEvents(startBlock, new(big.Int).Sub(endBlock, big.NewInt(1)))
 				if err != nil {
-					l.log.Error().Err(err).Msgf("Unable to handle events")
+					l.log.Warn().Err(err).Msgf("Unable to handle events")
 					continue loop
 				}
 			}
