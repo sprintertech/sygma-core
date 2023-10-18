@@ -11,7 +11,7 @@ package mock
 import (
 	reflect "reflect"
 
-	transactor "github.com/ChainSafe/sygma-core/chains/evm/transactor"
+	transactor "github.comsygmaprotcolsygma-core/chains/evm/transactor"
 	common "github.com/ethereum/go-ethereum/common"
 	gomock "go.uber.org/mock/gomock"
 )

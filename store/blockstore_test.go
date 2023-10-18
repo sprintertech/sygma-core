@@ -5,10 +5,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ChainSafe/sygma-core/mock"
-	"github.com/ChainSafe/sygma-core/store"
 	"github.com/stretchr/testify/suite"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.comsygmaprotcolsygma-core/mock"
+	"github.comsygmaprotcolsygma-core/store"
 	"go.uber.org/mock/gomock"
 )
 

@@ -3,9 +3,9 @@ package executor
 import (
 	"fmt"
 
-	"github.com/ChainSafe/sygma-core/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog/log"
+	"github.comsygmaprotcolsygma-core/types"
 )
 
 type HandlerMatcher interface {

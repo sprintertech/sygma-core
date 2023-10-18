@@ -4,10 +4,10 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/client"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.comsygmaprotcolsygma-core/chains/evm/client"
 )
 
 type TxFabric func(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrices []*big.Int, data []byte) (client.CommonTransaction, error)

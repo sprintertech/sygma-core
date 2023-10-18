@@ -12,7 +12,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	types "github.com/ChainSafe/sygma-core/types"
+	types "github.comsygmaprotcolsygma-core/types"
 	gomock "go.uber.org/mock/gomock"
 )
 

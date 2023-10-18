@@ -6,8 +6,8 @@ package relayer
 import (
 	"context"
 
-	"github.com/ChainSafe/sygma-core/types"
 	"github.com/rs/zerolog/log"
+	"github.comsygmaprotcolsygma-core/types"
 )
 
 type DepositMeter interface {

@@ -4,11 +4,11 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ChainSafe/sygma-core/chains/substrate/client"
-	"github.com/ChainSafe/sygma-core/store"
-	"github.com/ChainSafe/sygma-core/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.comsygmaprotcolsygma-core/chains/substrate/client"
+	"github.comsygmaprotcolsygma-core/store"
+	"github.comsygmaprotcolsygma-core/types"
 )
 
 type BatchProposalExecutor interface {

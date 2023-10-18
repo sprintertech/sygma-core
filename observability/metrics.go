@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ChainSafe/sygma-core/types"
+	"github.comsygmaprotcolsygma-core/types"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/metric"

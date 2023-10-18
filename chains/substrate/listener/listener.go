@@ -8,11 +8,11 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ChainSafe/sygma-core/store"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/parser"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.comsygmaprotcolsygma-core/store"
 )
 
 type EventHandler interface {

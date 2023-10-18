@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
-	"github.com/ChainSafe/sygma-core/mock"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/suite"
+	"github.comsygmaprotcolsygma-core/chains/evm/transactor"
+	"github.comsygmaprotcolsygma-core/mock"
 	"go.uber.org/mock/gomock"
 )
 

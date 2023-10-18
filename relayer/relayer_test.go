@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ChainSafe/sygma-core/mock"
-	"github.com/ChainSafe/sygma-core/types"
 	"github.com/stretchr/testify/suite"
+	"github.comsygmaprotcolsygma-core/mock"
+	"github.comsygmaprotcolsygma-core/types"
 	"go.uber.org/mock/gomock"
 )
 

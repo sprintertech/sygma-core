@@ -1,4 +1,4 @@
-module github.com/ChainSafe/sygma-core
+module github.com/sygmaprotcol/sygma-core
 
 go 1.19
 

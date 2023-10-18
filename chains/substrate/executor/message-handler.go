@@ -6,7 +6,7 @@ package executor
 import (
 	"fmt"
 
-	"github.com/ChainSafe/sygma-core/types"
+	"github.comsygmaprotcolsygma-core/types"
 
 	"github.com/rs/zerolog/log"
 )

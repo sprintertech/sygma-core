@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
 
-	"github.com/ChainSafe/sygma-core/mock"
+	"github.comsygmaprotcolsygma-core/mock"
 )
 
 type LondonGasPriceTestSuite struct {
