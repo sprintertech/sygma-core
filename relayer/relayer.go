@@ -57,7 +57,7 @@ func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message) {
 func (r *Relayer) route(msgs []*message.Message) {
 	destChain, ok := r.relayedChains[msgs[0].Destination]
 	if !ok {
-		log.Error().Uint8("domainID", destChain.DomainID()).Msgf("no resolver for destID %v to send message registered", msgs[0].Destination)
+		log.Error().Uint8("domainID", destChain.DomainID()).Msgf("No chain registered for destination domain")
 		return
 	}
 
