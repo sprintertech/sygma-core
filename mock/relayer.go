@@ -12,68 +12,10 @@ import (
 	context "context"
 	reflect "reflect"
 
-	types "github.com/sygmaprotocol/sygma-core/types"
+	message "github.com/sygmaprotocol/sygma-core/relayer/message"
+	proposal "github.com/sygmaprotocol/sygma-core/relayer/proposal"
 	gomock "go.uber.org/mock/gomock"
 )
-
-// MockDepositMeter is a mock of DepositMeter interface.
-type MockDepositMeter struct {
-	ctrl     *gomock.Controller
-	recorder *MockDepositMeterMockRecorder
-}
-
-// MockDepositMeterMockRecorder is the mock recorder for MockDepositMeter.
-type MockDepositMeterMockRecorder struct {
-	mock *MockDepositMeter
-}
-
-// NewMockDepositMeter creates a new mock instance.
-func NewMockDepositMeter(ctrl *gomock.Controller) *MockDepositMeter {
-	mock := &MockDepositMeter{ctrl: ctrl}
-	mock.recorder = &MockDepositMeterMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockDepositMeter) EXPECT() *MockDepositMeterMockRecorder {
-	return m.recorder
-}
-
-// TrackDepositMessage mocks base method.
-func (m_2 *MockDepositMeter) TrackDepositMessage(m *types.Message) {
-	m_2.ctrl.T.Helper()
-	m_2.ctrl.Call(m_2, "TrackDepositMessage", m)
-}
-
-// TrackDepositMessage indicates an expected call of TrackDepositMessage.
-func (mr *MockDepositMeterMockRecorder) TrackDepositMessage(m any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TrackDepositMessage", reflect.TypeOf((*MockDepositMeter)(nil).TrackDepositMessage), m)
-}
-
-// TrackExecutionError mocks base method.
-func (m_2 *MockDepositMeter) TrackExecutionError(m *types.Message) {
-	m_2.ctrl.T.Helper()
-	m_2.ctrl.Call(m_2, "TrackExecutionError", m)
-}
-
-// TrackExecutionError indicates an expected call of TrackExecutionError.
-func (mr *MockDepositMeterMockRecorder) TrackExecutionError(m any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TrackExecutionError", reflect.TypeOf((*MockDepositMeter)(nil).TrackExecutionError), m)
-}
-
-// TrackSuccessfulExecutionLatency mocks base method.
-func (m_2 *MockDepositMeter) TrackSuccessfulExecutionLatency(m *types.Message) {
-	m_2.ctrl.T.Helper()
-	m_2.ctrl.Call(m_2, "TrackSuccessfulExecutionLatency", m)
-}
-
-// TrackSuccessfulExecutionLatency indicates an expected call of TrackSuccessfulExecutionLatency.
-func (mr *MockDepositMeterMockRecorder) TrackSuccessfulExecutionLatency(m any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TrackSuccessfulExecutionLatency", reflect.TypeOf((*MockDepositMeter)(nil).TrackSuccessfulExecutionLatency), m)
-}
 
 // MockRelayedChain is a mock of RelayedChain interface.
 type MockRelayedChain struct {
@@ -124,16 +66,31 @@ func (mr *MockRelayedChainMockRecorder) PollEvents(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PollEvents", reflect.TypeOf((*MockRelayedChain)(nil).PollEvents), ctx)
 }
 
+// ReceiveMessage mocks base method.
+func (m_2 *MockRelayedChain) ReceiveMessage(m *message.Message) (*proposal.Proposal, error) {
+	m_2.ctrl.T.Helper()
+	ret := m_2.ctrl.Call(m_2, "ReceiveMessage", m)
+	ret0, _ := ret[0].(*proposal.Proposal)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ReceiveMessage indicates an expected call of ReceiveMessage.
+func (mr *MockRelayedChainMockRecorder) ReceiveMessage(m any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveMessage", reflect.TypeOf((*MockRelayedChain)(nil).ReceiveMessage), m)
+}
+
 // Write mocks base method.
-func (m *MockRelayedChain) Write(messages []*types.Message) error {
+func (m *MockRelayedChain) Write(proposals []*proposal.Proposal) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Write", messages)
+	ret := m.ctrl.Call(m, "Write", proposals)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Write indicates an expected call of Write.
-func (mr *MockRelayedChainMockRecorder) Write(messages any) *gomock.Call {
+func (mr *MockRelayedChainMockRecorder) Write(proposals any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Write", reflect.TypeOf((*MockRelayedChain)(nil).Write), messages)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Write", reflect.TypeOf((*MockRelayedChain)(nil).Write), proposals)
 }

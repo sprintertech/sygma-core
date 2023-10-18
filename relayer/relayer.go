@@ -7,39 +7,38 @@ import (
 	"context"
 
 	"github.com/rs/zerolog/log"
-	"github.com/sygmaprotocol/sygma-core/types"
+	"github.com/sygmaprotocol/sygma-core/relayer/message"
+	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
 )
 
-type DepositMeter interface {
-	TrackDepositMessage(m *types.Message)
-	TrackExecutionError(m *types.Message)
-	TrackSuccessfulExecutionLatency(m *types.Message)
-}
-
 type RelayedChain interface {
+	// PollEvents starts listening for on-chain events
 	PollEvents(ctx context.Context)
-	Write(messages []*types.Message) error
+	// ReceiveMessage accepts the message from the source chain and converts it into
+	// a Proposal to be submitted on-chain
+	ReceiveMessage(m *message.Message) (*proposal.Proposal, error)
+	// Write submits proposals on-chain.
+	// If multiple proposals submitted they are expected to be able to be batched.
+	Write(proposals []*proposal.Proposal) error
 	DomainID() uint8
 }
 
-func NewRelayer(chains []RelayedChain, metrics DepositMeter) *Relayer {
-	return &Relayer{relayedChains: chains, metrics: metrics}
+func NewRelayer(chains map[uint8]RelayedChain) *Relayer {
+	return &Relayer{relayedChains: chains}
 }
 
 type Relayer struct {
-	metrics       DepositMeter
-	relayedChains []RelayedChain
-	registry      map[uint8]RelayedChain
+	relayedChains map[uint8]RelayedChain
 }
 
-// Start function starts the relayer. Relayer routine is starting all the chains
-// and passing them with a channel that accepts unified cross chain message format
-func (r *Relayer) Start(ctx context.Context, msgChan chan []*types.Message) {
-	log.Debug().Msgf("Starting relayer")
+// Start function starts polling events for each chain and listens to cross-chain messages.
+// If an array of messages is sent to the channel they are expected to be to the same destination and
+// able to be handled in batches.
+func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message) {
+	log.Info().Msgf("Starting relayer")
 
 	for _, c := range r.relayedChains {
 		log.Debug().Msgf("Starting chain %v", c.DomainID())
-		r.addRelayedChain(c)
 		go c.PollEvents(ctx)
 	}
 
@@ -54,33 +53,32 @@ func (r *Relayer) Start(ctx context.Context, msgChan chan []*types.Message) {
 	}
 }
 
-// Route function runs destination writer by mapping DestinationID from message to registered writer.
-func (r *Relayer) route(msgs []*types.Message) {
-	destChain, ok := r.registry[msgs[0].Destination]
+// Route function routes the messages to the destination chain.
+func (r *Relayer) route(msgs []*message.Message) {
+	destChain, ok := r.relayedChains[msgs[0].Destination]
 	if !ok {
-		log.Error().Msgf("no resolver for destID %v to send message registered", msgs[0].Destination)
+		log.Error().Uint8("domainID", destChain.DomainID()).Msgf("No chain registered for destination domain")
 		return
 	}
 
-	log.Debug().Msgf("Sending messages %+v to destination %v", msgs, destChain.DomainID())
-	err := destChain.Write(msgs)
-	if err != nil {
-		for _, m := range msgs {
-			log.Err(err).Msgf("Failed sending messages %+v to destination %v", m, destChain.DomainID())
-			r.metrics.TrackExecutionError(m)
-		}
-		return
-	}
-
+	props := make([]*proposal.Proposal, 0)
 	for _, m := range msgs {
-		r.metrics.TrackSuccessfulExecutionLatency(m)
+		prop, err := destChain.ReceiveMessage(m)
+		if err != nil {
+			log.Err(err).Uint8("domainID", destChain.DomainID()).Msgf("Failed receiving message %+v", m)
+			continue
+		}
+		if prop != nil {
+			props = append(props, prop)
+		}
 	}
-}
+	if len(props) == 0 {
+		return
+	}
 
-func (r *Relayer) addRelayedChain(c RelayedChain) {
-	if r.registry == nil {
-		r.registry = make(map[uint8]RelayedChain)
+	err := destChain.Write(props)
+	if err != nil {
+		log.Err(err).Uint8("domainID", destChain.DomainID()).Msgf("Failed writing message")
+		return
 	}
-	domainID := c.DomainID()
-	r.registry[domainID] = c
 }

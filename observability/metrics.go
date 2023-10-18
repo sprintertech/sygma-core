@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sygmaprotocol/sygma-core/types"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/metric"
@@ -76,35 +75,8 @@ type RelayerMetrics struct {
 // NewRelayerMetrics initializes OpenTelemetry metrics
 func NewRelayerMetrics(meter metric.Meter, attributes ...attribute.KeyValue) (*RelayerMetrics, error) {
 	opts := api.WithAttributes(attributes...)
-	depositEventCounter, err := meter.Int64Counter(
-		"relayer.DepositEventCount",
-		metric.WithDescription("Number of deposit events per domain"))
-	if err != nil {
-		return nil, err
-
-	}
-	executionErrorCount, err := meter.Int64Counter(
-		"relayer.ExecutionErrorCount",
-		metric.WithDescription("Number of executions that failed"))
-	if err != nil {
-		return nil, err
-	}
-	executionLatencyPerRoute, err := meter.Int64Histogram(
-		"relayer.ExecutionLatencyPerRoute",
-		metric.WithDescription("Execution time histogram between indexing event and executing it per route"))
-	if err != nil {
-		return nil, err
-	}
-	executionLatency, err := meter.Int64Histogram(
-		"relayer.ExecutionLatency",
-		metric.WithDescription("Execution time histogram between indexing even`t and executing it"),
-		metric.WithUnit("ms"))
-	if err != nil {
-		return nil, err
-	}
 
 	blockDeltaMap := make(map[uint8]*big.Int)
-
 	blockDeltaGauge, err := meter.Int64ObservableGauge(
 		"relayer.BlockDelta",
 		metric.WithInt64Callback(func(context context.Context, result metric.Int64Observer) error {
@@ -119,66 +91,12 @@ func NewRelayerMetrics(meter metric.Meter, attributes ...attribute.KeyValue) (*R
 		metric.WithDescription("Difference between chain head and current indexed block per domain"),
 	)
 	return &RelayerMetrics{
-		meter:                    meter,
-		MessageEventTime:         make(map[string]time.Time),
-		Opts:                     opts,
-		DepositEventCount:        depositEventCounter,
-		ExecutionErrorCount:      executionErrorCount,
-		ExecutionLatencyPerRoute: executionLatencyPerRoute,
-		ExecutionLatency:         executionLatency,
-		BlockDelta:               blockDeltaGauge,
-		BlockDeltaMap:            blockDeltaMap,
+		meter:            meter,
+		MessageEventTime: make(map[string]time.Time),
+		Opts:             opts,
+		BlockDelta:       blockDeltaGauge,
+		BlockDeltaMap:    blockDeltaMap,
 	}, err
-}
-
-// TrackDepositMessage extracts metrics from deposit message and sends
-// them to OpenTelemetry collector
-func (t *RelayerMetrics) TrackDepositMessage(m *types.Message) {
-	t.DepositEventCount.Add(context.Background(), 1, t.Opts, api.WithAttributes(attribute.Int64("source", int64(m.Source))))
-
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	t.MessageEventTime[m.ID()] = time.Now()
-}
-
-func (t *RelayerMetrics) TrackExecutionError(m *types.Message) {
-	t.ExecutionErrorCount.Add(context.Background(), 1, t.Opts, api.WithAttributes(attribute.Int64("destination", int64(m.Source))))
-
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	delete(t.MessageEventTime, m.ID())
-}
-
-func (t *RelayerMetrics) TrackSuccessfulExecutionLatency(m *types.Message) {
-	executionLatency := time.Since(t.MessageEventTime[m.ID()]).Milliseconds() / 1000
-	t.ExecutionLatency.Record(context.Background(), executionLatency)
-	t.ExecutionLatencyPerRoute.Record(
-		context.Background(),
-		executionLatency,
-		t.Opts,
-		api.WithAttributes(attribute.Int64("source", int64(m.Source))),
-		api.WithAttributes(attribute.Int64("destination", int64(m.Destination))),
-	)
-
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	delete(t.MessageEventTime, m.ID())
-}
-
-func (t *RelayerMetrics) TrackSuccessfulExecution(m *types.Message) {
-	executionLatency := time.Since(t.MessageEventTime[m.ID()]).Milliseconds() / 1000
-	t.ExecutionLatency.Record(context.Background(), executionLatency)
-	t.ExecutionLatencyPerRoute.Record(
-		context.Background(),
-		executionLatency,
-		t.Opts,
-		api.WithAttributes(attribute.Int64("source", int64(m.Source))),
-		api.WithAttributes(attribute.Int64("destination", int64(m.Destination))),
-	)
-
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	delete(t.MessageEventTime, m.ID())
 }
 
 func (t *RelayerMetrics) TrackBlockDelta(domainID uint8, head *big.Int, current *big.Int) {

@@ -6,22 +6,26 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/sygmaprotocol/sygma-core/chains/substrate/client"
-	"github.com/sygmaprotocol/sygma-core/store"
-	"github.com/sygmaprotocol/sygma-core/types"
+	"github.com/sygmaprotocol/sygma-core/relayer/message"
+	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
 )
 
-type BatchProposalExecutor interface {
-	Execute(msgs []*types.Message) error
+type ProposalExecutor interface {
+	Execute(props []*proposal.Proposal) error
+}
+
+type MessageHandler interface {
+	HandleMessage(m *message.Message) (*proposal.Proposal, error)
+}
+
+type EventListener interface {
+	ListenToEvents(ctx context.Context, startBlock *big.Int)
 }
 
 type SubstrateChain struct {
-	client *client.SubstrateClient
-
-	listener EventListener
-	executor BatchProposalExecutor
-
-	blockstore *store.BlockStore
+	listener       EventListener
+	messageHandler MessageHandler
+	executor       ProposalExecutor
 
 	domainID   uint8
 	startBlock *big.Int
@@ -29,16 +33,12 @@ type SubstrateChain struct {
 	logger zerolog.Logger
 }
 
-type EventListener interface {
-	ListenToEvents(ctx context.Context, startBlock *big.Int)
-}
-
-func NewSubstrateChain(client *client.SubstrateClient, listener EventListener, blockstore *store.BlockStore, executor BatchProposalExecutor, domainID uint8, startBlock *big.Int) *SubstrateChain {
+func NewSubstrateChain(listener EventListener, messageHandler MessageHandler, executor ProposalExecutor, domainID uint8, startBlock *big.Int) *SubstrateChain {
 	return &SubstrateChain{
-		client:     client,
 		listener:   listener,
-		blockstore: blockstore,
 		executor:   executor,
+		domainID:   domainID,
+		startBlock: startBlock,
 		logger:     log.With().Uint8("domainID", domainID).Logger()}
 }
 
@@ -49,10 +49,14 @@ func (c *SubstrateChain) PollEvents(ctx context.Context) {
 	go c.listener.ListenToEvents(ctx, c.startBlock)
 }
 
-func (c *SubstrateChain) Write(msgs []*types.Message) error {
-	err := c.executor.Execute(msgs)
+func (c *SubstrateChain) ReceiveMessage(m *message.Message) (*proposal.Proposal, error) {
+	return c.messageHandler.HandleMessage(m)
+}
+
+func (c *SubstrateChain) Write(props []*proposal.Proposal) error {
+	err := c.executor.Execute(props)
 	if err != nil {
-		c.logger.Err(err).Msgf("error writing messages %+v on network %d", msgs, c.DomainID())
+		c.logger.Err(err).Msgf("error writing proposals %+v on network %d", props, c.DomainID())
 		return err
 	}
 
