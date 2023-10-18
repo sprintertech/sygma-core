@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.comsygmaprotcolsygma-core/mock"
+	"github.com/sygmaprotocol/sygma-core/mock"
 )
 
 type StaticGasPriceTestSuite struct {

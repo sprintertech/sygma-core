@@ -6,9 +6,9 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.comsygmaprotcolsygma-core/chains/substrate/client"
-	"github.comsygmaprotcolsygma-core/store"
-	"github.comsygmaprotcolsygma-core/types"
+	"github.com/sygmaprotocol/sygma-core/chains/substrate/client"
+	"github.com/sygmaprotocol/sygma-core/store"
+	"github.com/sygmaprotocol/sygma-core/types"
 )
 
 type BatchProposalExecutor interface {

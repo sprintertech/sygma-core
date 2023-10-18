@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"github.comsygmaprotcolsygma-core/mock"
-	"github.comsygmaprotcolsygma-core/types"
+	"github.com/sygmaprotocol/sygma-core/mock"
+	"github.com/sygmaprotocol/sygma-core/types"
 	"go.uber.org/mock/gomock"
 )
 

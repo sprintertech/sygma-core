@@ -4,10 +4,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.comsygmaprotcolsygma-core/chains/evm/transactor/gas"
-	"github.comsygmaprotcolsygma-core/chains/evm/transactor/transaction"
-	"github.comsygmaprotcolsygma-core/crypto/secp256k1"
-	"github.comsygmaprotcolsygma-core/mock"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor/gas"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor/transaction"
+	"github.com/sygmaprotocol/sygma-core/crypto/secp256k1"
+	"github.com/sygmaprotocol/sygma-core/mock"
 
 	"github.com/ethereum/go-ethereum/core/types"
 

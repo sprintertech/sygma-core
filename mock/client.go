@@ -13,7 +13,7 @@ import (
 	big "math/big"
 	reflect "reflect"
 
-	client "github.comsygmaprotcolsygma-core/chains/evm/client"
+	client "github.com/sygmaprotocol/sygma-core/chains/evm/client"
 	common "github.com/ethereum/go-ethereum/common"
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "go.uber.org/mock/gomock"

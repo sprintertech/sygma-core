@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog/log"
-	"github.comsygmaprotcolsygma-core/chains/evm/client"
-	"github.comsygmaprotcolsygma-core/chains/evm/transactor"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/client"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor"
 )
 
 const DefaultDeployGasLimit = 6000000

@@ -1,4 +1,4 @@
-module github.com/sygmaprotcol/sygma-core
+module github.com/sygmaprotocol/sygma-core
 
 go 1.19
 

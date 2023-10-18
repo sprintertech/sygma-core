@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+	"github.com/sygmaprotocol/sygma-core/mock"
+	"github.com/sygmaprotocol/sygma-core/store"
 	"github.com/syndtr/goleveldb/leveldb"
-	"github.comsygmaprotcolsygma-core/mock"
-	"github.comsygmaprotcolsygma-core/store"
 	"go.uber.org/mock/gomock"
 )
 

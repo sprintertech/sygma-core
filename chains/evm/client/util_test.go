@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/suite"
-	"github.comsygmaprotcolsygma-core/chains/evm/client"
-	"github.comsygmaprotcolsygma-core/crypto/secp256k1"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/client"
+	"github.com/sygmaprotocol/sygma-core/crypto/secp256k1"
 )
 
 type UtilsTestSuite struct {

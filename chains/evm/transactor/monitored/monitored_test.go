@@ -10,10 +10,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/suite"
-	"github.comsygmaprotcolsygma-core/chains/evm/transactor"
-	"github.comsygmaprotcolsygma-core/chains/evm/transactor/monitored"
-	"github.comsygmaprotcolsygma-core/chains/evm/transactor/transaction"
-	"github.comsygmaprotcolsygma-core/mock"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor/monitored"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor/transaction"
+	"github.com/sygmaprotocol/sygma-core/mock"
 	"go.uber.org/mock/gomock"
 )
 
