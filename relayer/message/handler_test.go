@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ChainSafe/sygma-core/mock"
-	"github.com/ChainSafe/sygma-core/relayer/message"
-	"github.com/ChainSafe/sygma-core/relayer/proposal"
 	"github.com/stretchr/testify/suite"
+	"github.com/sygmaprotocol/sygma-core/mock"
+	"github.com/sygmaprotocol/sygma-core/relayer/message"
+	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
 	"go.uber.org/mock/gomock"
 )
 
