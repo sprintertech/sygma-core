@@ -1,4 +1,4 @@
-name: Create Sygma relayer release
+name: Create Sygma core release
 
 on:
   push:
