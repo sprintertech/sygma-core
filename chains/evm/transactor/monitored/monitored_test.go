@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
-	"github.com/ChainSafe/sygma-core/chains/evm/transactor/monitored"
-	"github.com/ChainSafe/sygma-core/chains/evm/transactor/transaction"
-	"github.com/ChainSafe/sygma-core/mock"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/suite"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor/monitored"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor/transaction"
+	"github.com/sygmaprotocol/sygma-core/mock"
 	"go.uber.org/mock/gomock"
 )
 

@@ -3,7 +3,7 @@ package message
 import (
 	"fmt"
 
-	"github.com/ChainSafe/sygma-core/relayer/proposal"
+	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
 )
 
 type Handler interface {
