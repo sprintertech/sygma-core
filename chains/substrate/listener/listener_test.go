@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ChainSafe/sygma-core/chains/substrate/listener"
-	"github.com/ChainSafe/sygma-core/mock"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/stretchr/testify/suite"
+	"github.com/sygmaprotocol/sygma-core/chains/substrate/listener"
+	"github.com/sygmaprotocol/sygma-core/mock"
 	"go.uber.org/mock/gomock"
 )
 

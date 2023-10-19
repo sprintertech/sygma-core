@@ -11,7 +11,6 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/sygmaprotocol/sygma-core/store"
 )
 
 type EventHandler interface {

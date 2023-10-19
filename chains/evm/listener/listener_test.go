@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/listener"
-	"github.com/ChainSafe/sygma-core/mock"
 	"github.com/stretchr/testify/suite"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/listener"
+	"github.com/sygmaprotocol/sygma-core/mock"
 	"go.uber.org/mock/gomock"
 )
 

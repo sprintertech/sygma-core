@@ -41,4 +41,4 @@ genmocks:
 	mockgen -source=./store/store.go -destination=./mock/store.go -package mock
 	mockgen -source=./relayer/message/handler.go -destination=./mock/message.go -package mock
 	mockgen -source=./chains/evm/listener/listener.go -destination=./mock/evmListener.go -package mock
-	mockgen -destination=./mock/substrateListener.go -package mock github.com/ChainSafe/sygma-core/chains/substrate/listener ChainConnection 
+	mockgen -destination=./mock/substrateListener.go -package mock github.com/sygmaprotocol/sygma-core/chains/substrate/listener ChainConnection 
