@@ -6,9 +6,9 @@ package relayer
 import (
 	"context"
 
-	"github.com/ChainSafe/sygma-core/relayer/message"
-	"github.com/ChainSafe/sygma-core/relayer/proposal"
 	"github.com/rs/zerolog/log"
+	"github.com/sygmaprotocol/sygma-core/relayer/message"
+	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
 )
 
 type RelayedChain interface {

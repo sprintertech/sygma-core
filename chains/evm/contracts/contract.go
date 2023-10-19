@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/client"
-	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog/log"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/client"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor"
 )
 
 const DefaultDeployGasLimit = 6000000

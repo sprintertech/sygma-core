@@ -8,7 +8,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ChainSafe/sygma-core/store"
+	"github.com/sygmaprotocol/sygma-core/store"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

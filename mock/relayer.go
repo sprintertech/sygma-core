@@ -12,8 +12,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	message "github.com/ChainSafe/sygma-core/relayer/message"
-	proposal "github.com/ChainSafe/sygma-core/relayer/proposal"
+	message "github.com/sygmaprotocol/sygma-core/relayer/message"
+	proposal "github.com/sygmaprotocol/sygma-core/relayer/proposal"
 	gomock "go.uber.org/mock/gomock"
 )
 

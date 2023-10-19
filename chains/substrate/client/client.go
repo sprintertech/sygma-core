@@ -11,13 +11,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ChainSafe/sygma-core/chains/substrate/connection"
-	"github.com/ChainSafe/sygma-core/chains/substrate/events"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/rpc/author"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/rs/zerolog/log"
+	"github.com/sygmaprotocol/sygma-core/chains/substrate/connection"
+	"github.com/sygmaprotocol/sygma-core/chains/substrate/events"
 )
 
 type SubstrateClient struct {

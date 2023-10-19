@@ -45,8 +45,6 @@ When implementing a change:
 7. Title the PR in a meaningful way and describe the rationale and the thought process in the PR description.
 8. Write clean, thoughtful, and detailed [commit messages](https://chris.beams.io/posts/git-commit/).
 
-If change entails an update that needs to be documented, please submit a PR to [chainbridge-docs](https://github.com/ChainSafe/chainbridge-docs/tree/develop/docs) repo.
-
 
 ### Submiting a PR
 

@@ -7,10 +7,10 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ChainSafe/sygma-core/relayer/message"
-	"github.com/ChainSafe/sygma-core/relayer/proposal"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/sygmaprotocol/sygma-core/relayer/message"
+	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
 )
 
 type EventListener interface {
