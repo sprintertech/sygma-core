@@ -8,8 +8,6 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ChainSafe/sygma-core/store"
-
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -26,13 +24,17 @@ type BlockDeltaMeter interface {
 	TrackBlockDelta(domainID uint8, head *big.Int, current *big.Int)
 }
 
+type BlockStorer interface {
+	StoreBlock(block *big.Int, domainID uint8) error
+}
+
 type EVMListener struct {
 	client        ChainClient
 	eventHandlers []EventHandler
 	metrics       BlockDeltaMeter
+	blockstore    BlockStorer
 
 	domainID           uint8
-	blockstore         *store.BlockStore
 	blockRetryInterval time.Duration
 	blockConfirmations *big.Int
 	blockInterval      *big.Int
@@ -45,7 +47,7 @@ type EVMListener struct {
 func NewEVMListener(
 	client ChainClient,
 	eventHandlers []EventHandler,
-	blockstore *store.BlockStore,
+	blockstore BlockStorer,
 	metrics BlockDeltaMeter,
 	domainID uint8,
 	blockRetryInterval time.Duration,
@@ -69,6 +71,7 @@ func NewEVMListener(
 // configured for the listener.
 func (l *EVMListener) ListenToEvents(ctx context.Context, startBlock *big.Int) {
 	endBlock := big.NewInt(0)
+loop:
 	for {
 		select {
 		case <-ctx.Done():
@@ -76,7 +79,7 @@ func (l *EVMListener) ListenToEvents(ctx context.Context, startBlock *big.Int) {
 		default:
 			head, err := l.client.LatestBlock()
 			if err != nil {
-				l.log.Error().Err(err).Msg("Unable to get latest block")
+				l.log.Warn().Err(err).Msg("Unable to get latest block")
 				time.Sleep(l.blockRetryInterval)
 				continue
 			}
@@ -97,8 +100,8 @@ func (l *EVMListener) ListenToEvents(ctx context.Context, startBlock *big.Int) {
 			for _, handler := range l.eventHandlers {
 				err := handler.HandleEvents(startBlock, new(big.Int).Sub(endBlock, big.NewInt(1)))
 				if err != nil {
-					l.log.Error().Err(err).Msgf("Unable to handle events")
-					continue
+					l.log.Warn().Err(err).Msgf("Unable to handle events")
+					continue loop
 				}
 			}
 

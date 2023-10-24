@@ -13,9 +13,9 @@ import (
 	big "math/big"
 	reflect "reflect"
 
-	client "github.com/ChainSafe/sygma-core/chains/evm/client"
 	common "github.com/ethereum/go-ethereum/common"
 	types "github.com/ethereum/go-ethereum/core/types"
+	client "github.com/sygmaprotocol/sygma-core/chains/evm/client"
 	gomock "go.uber.org/mock/gomock"
 )
 

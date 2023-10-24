@@ -8,6 +8,7 @@ type Metadata struct {
 	Data map[string]interface{}
 }
 type TransferType string
+type ResourceID [32]byte
 
 const (
 	FungibleTransfer    TransferType = "FungibleTransfer"

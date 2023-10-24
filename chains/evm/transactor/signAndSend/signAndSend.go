@@ -4,11 +4,11 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ChainSafe/sygma-core/chains/evm/client"
-	"github.com/ChainSafe/sygma-core/chains/evm/transactor"
-	"github.com/ChainSafe/sygma-core/chains/evm/transactor/transaction"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog/log"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/client"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor"
+	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor/transaction"
 )
 
 type GasPricer interface {

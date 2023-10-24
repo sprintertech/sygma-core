@@ -1,19 +1,21 @@
 package relayer
 
 import (
+	"context"
 	"fmt"
 	"testing"
+	"time"
 
-	"github.com/ChainSafe/sygma-core/mock"
-	"github.com/ChainSafe/sygma-core/types"
 	"github.com/stretchr/testify/suite"
+	"github.com/sygmaprotocol/sygma-core/mock"
+	"github.com/sygmaprotocol/sygma-core/relayer/message"
+	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
 	"go.uber.org/mock/gomock"
 )
 
 type RouteTestSuite struct {
 	suite.Suite
 	mockRelayedChain *mock.MockRelayedChain
-	mockMetrics      *mock.MockDepositMeter
 }
 
 func TestRunRouteTestSuite(t *testing.T) {
@@ -25,46 +27,91 @@ func (s *RouteTestSuite) TearDownSuite() {}
 func (s *RouteTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
 	s.mockRelayedChain = mock.NewMockRelayedChain(gomockController)
-	s.mockMetrics = mock.NewMockDepositMeter(gomockController)
 }
 func (s *RouteTestSuite) TearDownTest() {}
 
-func (s *RouteTestSuite) TestLogsErrorIfDestinationDoesNotExist() {
-	relayer := Relayer{
-		metrics: s.mockMetrics,
-	}
+func (s *RouteTestSuite) TestStartListensOnChannel() {
+	ctx, cancel := context.WithCancel(context.TODO())
 
-	relayer.route([]*types.Message{
-		{},
+	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1))
+	s.mockRelayedChain.EXPECT().PollEvents(gomock.Any())
+	s.mockRelayedChain.EXPECT().DomainID().DoAndReturn(func() uint8 {
+		cancel()
+		return 1
 	})
+	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(nil, fmt.Errorf("error"))
+	chains := make(map[uint8]RelayedChain)
+	chains[1] = s.mockRelayedChain
+	relayer := NewRelayer(
+		chains,
+	)
+
+	msgChan := make(chan []*message.Message, 1)
+	msgChan <- []*message.Message{
+		{Destination: 1},
+	}
+	relayer.Start(ctx, msgChan)
+	time.Sleep(time.Millisecond * 100)
 }
 
-func (s *RouteTestSuite) TestWriteFail() {
-	s.mockMetrics.EXPECT().TrackExecutionError(gomock.Any())
-	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(3)
-	s.mockRelayedChain.EXPECT().Write(gomock.Any()).Return(fmt.Errorf("error"))
+func (s *RouteTestSuite) TestReceiveMessageFails() {
+	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(1)
+	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(nil, fmt.Errorf("error"))
+	chains := make(map[uint8]RelayedChain)
+	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
-		[]RelayedChain{},
-		s.mockMetrics,
+		chains,
 	)
-	relayer.addRelayedChain(s.mockRelayedChain)
 
-	relayer.route([]*types.Message{
+	relayer.route([]*message.Message{
 		{Destination: 1},
 	})
 }
 
-func (s *RouteTestSuite) TestWritesToDestChainIfMessageValid() {
-	s.mockMetrics.EXPECT().TrackSuccessfulExecutionLatency(gomock.Any())
-	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(2)
-	s.mockRelayedChain.EXPECT().Write(gomock.Any())
+func (s *RouteTestSuite) TestAvoidWriteWithoutProposals() {
+	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(nil, nil)
+	chains := make(map[uint8]RelayedChain)
+	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
-		[]RelayedChain{},
-		s.mockMetrics,
+		chains,
 	)
-	relayer.addRelayedChain(s.mockRelayedChain)
 
-	relayer.route([]*types.Message{
+	relayer.route([]*message.Message{
+		{Destination: 1},
+	})
+}
+
+func (s *RouteTestSuite) TestWriteFails() {
+	props := make([]*proposal.Proposal, 1)
+	prop := &proposal.Proposal{}
+	props[0] = prop
+	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(prop, nil)
+	s.mockRelayedChain.EXPECT().Write(props).Return(fmt.Errorf("error"))
+	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(1)
+	chains := make(map[uint8]RelayedChain)
+	chains[1] = s.mockRelayedChain
+	relayer := NewRelayer(
+		chains,
+	)
+
+	relayer.route([]*message.Message{
+		{Destination: 1},
+	})
+}
+
+func (s *RouteTestSuite) TestWritesToChain() {
+	props := make([]*proposal.Proposal, 1)
+	prop := &proposal.Proposal{}
+	props[0] = prop
+	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(prop, nil)
+	s.mockRelayedChain.EXPECT().Write(props).Return(nil)
+	chains := make(map[uint8]RelayedChain)
+	chains[1] = s.mockRelayedChain
+	relayer := NewRelayer(
+		chains,
+	)
+
+	relayer.route([]*message.Message{
 		{Destination: 1},
 	})
 }

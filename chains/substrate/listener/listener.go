@@ -8,31 +8,33 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ChainSafe/sygma-core/store"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/parser"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 type EventHandler interface {
-	HandleEvents(evts []*parser.Event) error
+	HandleEvents(startBlock *big.Int, endBlock *big.Int) error
 }
+
 type ChainConnection interface {
-	UpdateMetatdata() error
-	GetHeaderLatest() (*types.Header, error)
-	GetBlockHash(blockNumber uint64) (types.Hash, error)
-	GetBlockEvents(hash types.Hash) ([]*parser.Event, error)
 	GetFinalizedHead() (types.Hash, error)
 	GetBlock(blockHash types.Hash) (*types.SignedBlock, error)
 }
 
+type BlockStorer interface {
+	StoreBlock(block *big.Int, domainID uint8) error
+}
+
+type BlockDeltaMeter interface {
+	TrackBlockDelta(domainID uint8, head *big.Int, current *big.Int)
+}
+
 type SubstrateListener struct {
-	conn ChainConnection
-
-	blockstore store.BlockStore
-
+	conn          ChainConnection
+	blockstore    BlockStorer
 	eventHandlers []EventHandler
+	metrics       BlockDeltaMeter
 
 	blockRetryInterval time.Duration
 	blockInterval      *big.Int
@@ -41,7 +43,7 @@ type SubstrateListener struct {
 	log zerolog.Logger
 }
 
-func NewSubstrateListener(connection ChainConnection, blockstore store.BlockStore, eventHandlers []EventHandler, domainID uint8, blockRetryInterval time.Duration, blockInterval *big.Int) *SubstrateListener {
+func NewSubstrateListener(connection ChainConnection, eventHandlers []EventHandler, blockstore BlockStorer, metrics BlockDeltaMeter, domainID uint8, blockRetryInterval time.Duration, blockInterval *big.Int) *SubstrateListener {
 	return &SubstrateListener{
 		log:                log.With().Uint8("domainID", domainID).Logger(),
 		domainID:           domainID,
@@ -50,6 +52,7 @@ func NewSubstrateListener(connection ChainConnection, blockstore store.BlockStor
 		eventHandlers:      eventHandlers,
 		blockRetryInterval: blockRetryInterval,
 		blockInterval:      blockInterval,
+		metrics:            metrics,
 	}
 }
 
@@ -57,6 +60,7 @@ func (l *SubstrateListener) ListenToEvents(ctx context.Context, startBlock *big.
 	endBlock := big.NewInt(0)
 
 	go func() {
+	loop:
 		for {
 			select {
 			case <-ctx.Done():
@@ -64,13 +68,13 @@ func (l *SubstrateListener) ListenToEvents(ctx context.Context, startBlock *big.
 			default:
 				hash, err := l.conn.GetFinalizedHead()
 				if err != nil {
-					l.log.Error().Err(err).Msg("Failed to fetch finalized header")
+					l.log.Warn().Err(err).Msg("Failed to fetch finalized header")
 					time.Sleep(l.blockRetryInterval)
 					continue
 				}
 				head, err := l.conn.GetBlock(hash)
 				if err != nil {
-					l.log.Error().Err(err).Msg("Failed to fetch block")
+					l.log.Warn().Err(err).Msg("Failed to fetch block")
 					time.Sleep(l.blockRetryInterval)
 					continue
 				}
@@ -86,21 +90,18 @@ func (l *SubstrateListener) ListenToEvents(ctx context.Context, startBlock *big.
 					continue
 				}
 
-				evts, err := l.fetchEvents(startBlock, endBlock)
-				if err != nil {
-					l.log.Err(err).Msgf("Failed fetching events for block range %s-%s", startBlock, endBlock)
-					time.Sleep(l.blockRetryInterval)
-					continue
-				}
+				l.metrics.TrackBlockDelta(l.domainID, big.NewInt(int64(head.Block.Header.Number)), endBlock)
+				l.log.Debug().Msgf("Fetching substrate events for block range %s-%s", startBlock, endBlock)
 
 				for _, handler := range l.eventHandlers {
-					err := handler.HandleEvents(evts)
+					err := handler.HandleEvents(startBlock, new(big.Int).Sub(endBlock, big.NewInt(1)))
 					if err != nil {
-						l.log.Error().Err(err).Msg("Error handling substrate events")
-						continue
+						l.log.Warn().Err(err).Msg("Error handling substrate events")
+						continue loop
 					}
 				}
-				err = l.blockstore.StoreBlock(startBlock, l.domainID)
+
+				err = l.blockstore.StoreBlock(endBlock, l.domainID)
 				if err != nil {
 					l.log.Error().Str("block", startBlock.String()).Err(err).Msg("Failed to write latest block to blockstore")
 				}
@@ -108,25 +109,4 @@ func (l *SubstrateListener) ListenToEvents(ctx context.Context, startBlock *big.
 			}
 		}
 	}()
-}
-
-func (l *SubstrateListener) fetchEvents(startBlock *big.Int, endBlock *big.Int) ([]*parser.Event, error) {
-	l.log.Debug().Msgf("Fetching substrate events for block range %s-%s", startBlock, endBlock)
-
-	evts := make([]*parser.Event, 0)
-	for i := new(big.Int).Set(startBlock); i.Cmp(endBlock) == -1; i.Add(i, big.NewInt(1)) {
-		hash, err := l.conn.GetBlockHash(i.Uint64())
-		if err != nil {
-			return nil, err
-		}
-
-		evt, err := l.conn.GetBlockEvents(hash)
-		if err != nil {
-			return nil, err
-		}
-		evts = append(evts, evt...)
-
-	}
-
-	return evts, nil
 }
