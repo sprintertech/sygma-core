@@ -11,30 +11,30 @@ import (
 	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
 )
 
-type RelayedChain interface {
+type RelayedChain[T any] interface {
 	// PollEvents starts listening for on-chain events
 	PollEvents(ctx context.Context)
 	// ReceiveMessage accepts the message from the source chain and converts it into
 	// a Proposal to be submitted on-chain
-	ReceiveMessage(m *message.Message) (*proposal.Proposal, error)
+	ReceiveMessage(m *message.Message[T]) (*proposal.Proposal[T], error)
 	// Write submits proposals on-chain.
 	// If multiple proposals submitted they are expected to be able to be batched.
-	Write(proposals []*proposal.Proposal) error
+	Write(proposals []*proposal.Proposal[T]) error
 	DomainID() uint8
 }
 
-func NewRelayer(chains map[uint8]RelayedChain) *Relayer {
-	return &Relayer{relayedChains: chains}
+func NewRelayer[T any](chains map[uint8]RelayedChain[T]) *Relayer[T] {
+	return &Relayer[T]{relayedChains: chains}
 }
 
-type Relayer struct {
-	relayedChains map[uint8]RelayedChain
+type Relayer[T any] struct {
+	relayedChains map[uint8]RelayedChain[T]
 }
 
 // Start function starts polling events for each chain and listens to cross-chain messages.
 // If an array of messages is sent to the channel they are expected to be to the same destination and
 // able to be handled in batches.
-func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message) {
+func (r *Relayer[T]) Start(ctx context.Context, msgChan chan []*message.Message[T]) {
 	log.Info().Msgf("Starting relayer")
 
 	for _, c := range r.relayedChains {
@@ -54,14 +54,14 @@ func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message) {
 }
 
 // Route function routes the messages to the destination chain.
-func (r *Relayer) route(msgs []*message.Message) {
+func (r *Relayer[T]) route(msgs []*message.Message[T]) {
 	destChain, ok := r.relayedChains[msgs[0].Destination]
 	if !ok {
 		log.Error().Uint8("domainID", destChain.DomainID()).Msgf("No chain registered for destination domain")
 		return
 	}
 
-	props := make([]*proposal.Proposal, 0)
+	props := make([]*proposal.Proposal[T], 0)
 	for _, m := range msgs {
 		prop, err := destChain.ReceiveMessage(m)
 		if err != nil {
