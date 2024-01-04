@@ -7,7 +7,7 @@ import (
 )
 
 type Handler interface {
-	HandleMessage(m *Message) (*proposal.Proposal, error)
+	HandleMessage(m *Message[any]) (*proposal.Proposal[any], error)
 }
 
 type MessageHandler struct {
@@ -21,7 +21,7 @@ func NewMessageHandler() *MessageHandler {
 }
 
 // HandlerMessage calls associated handler for that message type and returns a proposal to be submitted on-chain
-func (h *MessageHandler) HandleMessage(m *Message) (*proposal.Proposal, error) {
+func (h *MessageHandler) HandleMessage(m *Message[any]) (*proposal.Proposal[any], error) {
 	mh, ok := h.handlers[m.Type]
 	if !ok {
 		return nil, fmt.Errorf("no handler found for type %s", m.Type)

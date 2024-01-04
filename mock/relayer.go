@@ -67,10 +67,10 @@ func (mr *MockRelayedChainMockRecorder) PollEvents(ctx any) *gomock.Call {
 }
 
 // ReceiveMessage mocks base method.
-func (m_2 *MockRelayedChain) ReceiveMessage(m *message.Message) (*proposal.Proposal, error) {
+func (m_2 *MockRelayedChain) ReceiveMessage(m *message.Message[any]) (*proposal.Proposal[any], error) {
 	m_2.ctrl.T.Helper()
 	ret := m_2.ctrl.Call(m_2, "ReceiveMessage", m)
-	ret0, _ := ret[0].(*proposal.Proposal)
+	ret0, _ := ret[0].(*proposal.Proposal[any])
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -82,7 +82,7 @@ func (mr *MockRelayedChainMockRecorder) ReceiveMessage(m any) *gomock.Call {
 }
 
 // Write mocks base method.
-func (m *MockRelayedChain) Write(proposals []*proposal.Proposal) error {
+func (m *MockRelayedChain) Write(proposals []*proposal.Proposal[any]) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Write", proposals)
 	ret0, _ := ret[0].(error)
