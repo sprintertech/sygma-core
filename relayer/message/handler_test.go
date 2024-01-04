@@ -29,7 +29,7 @@ func (s *MessageHandlerTestSuite) SetupTest() {
 func (s *MessageHandlerTestSuite) TestHandleMessageWithoutRegisteredHandler() {
 	mh := message.NewMessageHandler()
 
-	_, err := mh.HandleMessage(&message.Message[any]{Type: "invalid"})
+	_, err := mh.HandleMessage(&message.Message{Type: "invalid"})
 
 	s.NotNil(err)
 }
@@ -38,7 +38,7 @@ func (s *MessageHandlerTestSuite) TestHandleMessageWithInvalidType() {
 	mh := message.NewMessageHandler()
 	mh.RegisterMessageHandler("invalid", s.mockHandler)
 
-	_, err := mh.HandleMessage(&message.Message[any]{Type: "valid"})
+	_, err := mh.HandleMessage(&message.Message{Type: "valid"})
 
 	s.NotNil(err)
 }
@@ -49,13 +49,13 @@ func (s *MessageHandlerTestSuite) TestHandleMessageHandlerReturnsError() {
 	mh := message.NewMessageHandler()
 	mh.RegisterMessageHandler("valid", s.mockHandler)
 
-	_, err := mh.HandleMessage(&message.Message[any]{Type: "valid"})
+	_, err := mh.HandleMessage(&message.Message{Type: "valid"})
 
 	s.NotNil(err)
 }
 
 func (s *MessageHandlerTestSuite) TestHandleMessageWithValidType() {
-	expectedProp := &proposal.Proposal[any]{
+	expectedProp := &proposal.Proposal{
 		Type: "prop",
 	}
 	s.mockHandler.EXPECT().HandleMessage(gomock.Any()).Return(expectedProp, nil)
@@ -63,7 +63,7 @@ func (s *MessageHandlerTestSuite) TestHandleMessageWithValidType() {
 	mh := message.NewMessageHandler()
 	mh.RegisterMessageHandler("valid", s.mockHandler)
 
-	msg := message.NewMessage[any](1, 2, nil, "valid")
+	msg := message.NewMessage(1, 2, nil, "valid")
 	prop, err := mh.HandleMessage(msg)
 
 	s.Nil(err)

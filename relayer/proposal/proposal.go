@@ -1,15 +1,15 @@
 package proposal
 
 type ProposalType string
-type Proposal[T any] struct {
+type Proposal struct {
 	Source      uint8
 	Destination uint8
-	Data        T
+	Data        interface{}
 	Type        ProposalType
 }
 
-func NewProposal[T any](source, destination uint8, data T, propType ProposalType) *Proposal[T] {
-	return &Proposal[T]{
+func NewProposal(source, destination uint8, data []byte, propType ProposalType) *Proposal {
+	return &Proposal{
 		Source:      source,
 		Destination: destination,
 		Data:        data,
