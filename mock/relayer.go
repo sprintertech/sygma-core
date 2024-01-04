@@ -18,30 +18,30 @@ import (
 )
 
 // MockRelayedChain is a mock of RelayedChain interface.
-type MockRelayedChain[T any] struct {
+type MockRelayedChain struct {
 	ctrl     *gomock.Controller
-	recorder *MockRelayedChainMockRecorder[T]
+	recorder *MockRelayedChainMockRecorder
 }
 
 // MockRelayedChainMockRecorder is the mock recorder for MockRelayedChain.
-type MockRelayedChainMockRecorder[T any] struct {
-	mock *MockRelayedChain[T]
+type MockRelayedChainMockRecorder struct {
+	mock *MockRelayedChain
 }
 
 // NewMockRelayedChain creates a new mock instance.
-func NewMockRelayedChain[T any](ctrl *gomock.Controller) *MockRelayedChain[T] {
-	mock := &MockRelayedChain[T]{ctrl: ctrl}
-	mock.recorder = &MockRelayedChainMockRecorder[T]{mock}
+func NewMockRelayedChain(ctrl *gomock.Controller) *MockRelayedChain {
+	mock := &MockRelayedChain{ctrl: ctrl}
+	mock.recorder = &MockRelayedChainMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockRelayedChain[T]) EXPECT() *MockRelayedChainMockRecorder[T] {
+func (m *MockRelayedChain) EXPECT() *MockRelayedChainMockRecorder {
 	return m.recorder
 }
 
 // DomainID mocks base method.
-func (m *MockRelayedChain[T]) DomainID() uint8 {
+func (m *MockRelayedChain) DomainID() uint8 {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DomainID")
 	ret0, _ := ret[0].(uint8)
@@ -49,40 +49,40 @@ func (m *MockRelayedChain[T]) DomainID() uint8 {
 }
 
 // DomainID indicates an expected call of DomainID.
-func (mr *MockRelayedChainMockRecorder[T]) DomainID() *gomock.Call {
+func (mr *MockRelayedChainMockRecorder) DomainID() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DomainID", reflect.TypeOf((*MockRelayedChain[T])(nil).DomainID))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DomainID", reflect.TypeOf((*MockRelayedChain)(nil).DomainID))
 }
 
 // PollEvents mocks base method.
-func (m *MockRelayedChain[T]) PollEvents(ctx context.Context) {
+func (m *MockRelayedChain) PollEvents(ctx context.Context) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "PollEvents", ctx)
 }
 
 // PollEvents indicates an expected call of PollEvents.
-func (mr *MockRelayedChainMockRecorder[T]) PollEvents(ctx any) *gomock.Call {
+func (mr *MockRelayedChainMockRecorder) PollEvents(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PollEvents", reflect.TypeOf((*MockRelayedChain[T])(nil).PollEvents), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PollEvents", reflect.TypeOf((*MockRelayedChain)(nil).PollEvents), ctx)
 }
 
 // ReceiveMessage mocks base method.
-func (m_2 *MockRelayedChain[T]) ReceiveMessage(m *message.Message[T]) (*proposal.Proposal[T], error) {
+func (m_2 *MockRelayedChain) ReceiveMessage(m *message.Message[any]) (*proposal.Proposal[any], error) {
 	m_2.ctrl.T.Helper()
 	ret := m_2.ctrl.Call(m_2, "ReceiveMessage", m)
-	ret0, _ := ret[0].(*proposal.Proposal[T])
+	ret0, _ := ret[0].(*proposal.Proposal[any])
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ReceiveMessage indicates an expected call of ReceiveMessage.
-func (mr *MockRelayedChainMockRecorder[T]) ReceiveMessage(m any) *gomock.Call {
+func (mr *MockRelayedChainMockRecorder) ReceiveMessage(m any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveMessage", reflect.TypeOf((*MockRelayedChain[T])(nil).ReceiveMessage), m)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveMessage", reflect.TypeOf((*MockRelayedChain)(nil).ReceiveMessage), m)
 }
 
 // Write mocks base method.
-func (m *MockRelayedChain[T]) Write(proposals []*proposal.Proposal[T]) error {
+func (m *MockRelayedChain) Write(proposals []*proposal.Proposal[any]) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Write", proposals)
 	ret0, _ := ret[0].(error)
@@ -90,7 +90,7 @@ func (m *MockRelayedChain[T]) Write(proposals []*proposal.Proposal[T]) error {
 }
 
 // Write indicates an expected call of Write.
-func (mr *MockRelayedChainMockRecorder[T]) Write(proposals any) *gomock.Call {
+func (mr *MockRelayedChainMockRecorder) Write(proposals any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Write", reflect.TypeOf((*MockRelayedChain[T])(nil).Write), proposals)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Write", reflect.TypeOf((*MockRelayedChain)(nil).Write), proposals)
 }

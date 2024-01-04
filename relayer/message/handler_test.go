@@ -14,7 +14,7 @@ import (
 type MessageHandlerTestSuite struct {
 	suite.Suite
 
-	mockHandler *mock.MockHandler[any]
+	mockHandler *mock.MockHandler
 }
 
 func TestRunMessageHandlerTestSuite(t *testing.T) {
@@ -23,11 +23,11 @@ func TestRunMessageHandlerTestSuite(t *testing.T) {
 
 func (s *MessageHandlerTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
-	s.mockHandler = mock.NewMockHandler[any](gomockController)
+	s.mockHandler = mock.NewMockHandler(gomockController)
 }
 
 func (s *MessageHandlerTestSuite) TestHandleMessageWithoutRegisteredHandler() {
-	mh := message.NewMessageHandler[any]()
+	mh := message.NewMessageHandler()
 
 	_, err := mh.HandleMessage(&message.Message[any]{Type: "invalid"})
 
@@ -35,7 +35,7 @@ func (s *MessageHandlerTestSuite) TestHandleMessageWithoutRegisteredHandler() {
 }
 
 func (s *MessageHandlerTestSuite) TestHandleMessageWithInvalidType() {
-	mh := message.NewMessageHandler[any]()
+	mh := message.NewMessageHandler()
 	mh.RegisterMessageHandler("invalid", s.mockHandler)
 
 	_, err := mh.HandleMessage(&message.Message[any]{Type: "valid"})
@@ -46,7 +46,7 @@ func (s *MessageHandlerTestSuite) TestHandleMessageWithInvalidType() {
 func (s *MessageHandlerTestSuite) TestHandleMessageHandlerReturnsError() {
 	s.mockHandler.EXPECT().HandleMessage(gomock.Any()).Return(nil, fmt.Errorf("error"))
 
-	mh := message.NewMessageHandler[any]()
+	mh := message.NewMessageHandler()
 	mh.RegisterMessageHandler("valid", s.mockHandler)
 
 	_, err := mh.HandleMessage(&message.Message[any]{Type: "valid"})
@@ -60,7 +60,7 @@ func (s *MessageHandlerTestSuite) TestHandleMessageWithValidType() {
 	}
 	s.mockHandler.EXPECT().HandleMessage(gomock.Any()).Return(expectedProp, nil)
 
-	mh := message.NewMessageHandler[any]()
+	mh := message.NewMessageHandler()
 	mh.RegisterMessageHandler("valid", s.mockHandler)
 
 	msg := message.NewMessage[any](1, 2, nil, "valid")
