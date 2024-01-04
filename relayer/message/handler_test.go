@@ -63,7 +63,12 @@ func (s *MessageHandlerTestSuite) TestHandleMessageWithValidType() {
 	mh := message.NewMessageHandler()
 	mh.RegisterMessageHandler("valid", s.mockHandler)
 
-	msg := message.NewMessage(1, 2, nil, "valid")
+	msg := &message.Message{
+		Source:      1,
+		Destination: 2,
+		Data:        nil,
+		Type:        "valid",
+	}
 	prop, err := mh.HandleMessage(msg)
 
 	s.Nil(err)

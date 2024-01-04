@@ -7,17 +7,3 @@ type Message struct {
 	Data        interface{} // Data associated with the message
 	Type        MessageType // Message type
 }
-
-func NewMessage(
-	source uint8,
-	destination uint8,
-	data interface{},
-	msgType MessageType,
-) *Message {
-	return &Message{
-		source,
-		destination,
-		data,
-		msgType,
-	}
-}
