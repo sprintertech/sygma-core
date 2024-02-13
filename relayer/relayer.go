@@ -16,10 +16,10 @@ type RelayedChain interface {
 	PollEvents(ctx context.Context)
 	// ReceiveMessage accepts the message from the source chain and converts it into
 	// a Proposal to be submitted on-chain
-	ReceiveMessage(m *message.Message[any]) (*proposal.Proposal[any], error)
+	ReceiveMessage(m *message.Message) (*proposal.Proposal, error)
 	// Write submits proposals on-chain.
 	// If multiple proposals submitted they are expected to be able to be batched.
-	Write(proposals []*proposal.Proposal[any]) error
+	Write(proposals []*proposal.Proposal) error
 	DomainID() uint8
 }
 
@@ -34,7 +34,7 @@ type Relayer struct {
 // Start function starts polling events for each chain and listens to cross-chain messages.
 // If an array of messages is sent to the channel they are expected to be to the same destination and
 // able to be handled in batches.
-func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message[any]) {
+func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message) {
 	log.Info().Msgf("Starting relayer")
 
 	for _, c := range r.relayedChains {
@@ -54,14 +54,14 @@ func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message[any
 }
 
 // Route function routes the messages to the destination chain.
-func (r *Relayer) route(msgs []*message.Message[any]) {
+func (r *Relayer) route(msgs []*message.Message) {
 	destChain, ok := r.relayedChains[msgs[0].Destination]
 	if !ok {
 		log.Error().Uint8("domainID", destChain.DomainID()).Msgf("No chain registered for destination domain")
 		return
 	}
 
-	props := make([]*proposal.Proposal[any], 0)
+	props := make([]*proposal.Proposal, 0)
 	for _, m := range msgs {
 		prop, err := destChain.ReceiveMessage(m)
 		if err != nil {

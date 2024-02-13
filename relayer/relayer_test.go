@@ -46,8 +46,8 @@ func (s *RouteTestSuite) TestStartListensOnChannel() {
 		chains,
 	)
 
-	msgChan := make(chan []*message.Message[any], 1)
-	msgChan <- []*message.Message[any]{
+	msgChan := make(chan []*message.Message, 1)
+	msgChan <- []*message.Message{
 		{Destination: 1},
 	}
 	relayer.Start(ctx, msgChan)
@@ -63,7 +63,7 @@ func (s *RouteTestSuite) TestReceiveMessageFails() {
 		chains,
 	)
 
-	relayer.route([]*message.Message[any]{
+	relayer.route([]*message.Message{
 		{Destination: 1},
 	})
 }
@@ -76,14 +76,14 @@ func (s *RouteTestSuite) TestAvoidWriteWithoutProposals() {
 		chains,
 	)
 
-	relayer.route([]*message.Message[any]{
+	relayer.route([]*message.Message{
 		{Destination: 1},
 	})
 }
 
 func (s *RouteTestSuite) TestWriteFails() {
-	props := make([]*proposal.Proposal[any], 1)
-	prop := &proposal.Proposal[any]{}
+	props := make([]*proposal.Proposal, 1)
+	prop := &proposal.Proposal{}
 	props[0] = prop
 	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(prop, nil)
 	s.mockRelayedChain.EXPECT().Write(props).Return(fmt.Errorf("error"))
@@ -94,14 +94,14 @@ func (s *RouteTestSuite) TestWriteFails() {
 		chains,
 	)
 
-	relayer.route([]*message.Message[any]{
+	relayer.route([]*message.Message{
 		{Destination: 1},
 	})
 }
 
 func (s *RouteTestSuite) TestWritesToChain() {
-	props := make([]*proposal.Proposal[any], 1)
-	prop := &proposal.Proposal[any]{}
+	props := make([]*proposal.Proposal, 1)
+	prop := &proposal.Proposal{}
 	props[0] = prop
 	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(prop, nil)
 	s.mockRelayedChain.EXPECT().Write(props).Return(nil)
@@ -111,7 +111,7 @@ func (s *RouteTestSuite) TestWritesToChain() {
 		chains,
 	)
 
-	relayer.route([]*message.Message[any]{
+	relayer.route([]*message.Message{
 		{Destination: 1},
 	})
 }

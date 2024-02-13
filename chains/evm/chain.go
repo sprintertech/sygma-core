@@ -18,11 +18,11 @@ type EventListener interface {
 }
 
 type ProposalExecutor interface {
-	Execute(props []*proposal.Proposal[any]) error
+	Execute(props []*proposal.Proposal) error
 }
 
 type MessageHandler interface {
-	HandleMessage(m *message.Message[any]) (*proposal.Proposal[any], error)
+	HandleMessage(m *message.Message) (*proposal.Proposal, error)
 }
 
 // EVMChain is struct that aggregates all data required for
@@ -55,11 +55,11 @@ func (c *EVMChain) PollEvents(ctx context.Context) {
 	go c.listener.ListenToEvents(ctx, c.startBlock)
 }
 
-func (c *EVMChain) ReceiveMessage(m *message.Message[any]) (*proposal.Proposal[any], error) {
+func (c *EVMChain) ReceiveMessage(m *message.Message) (*proposal.Proposal, error) {
 	return c.messageHandler.HandleMessage(m)
 }
 
-func (c *EVMChain) Write(props []*proposal.Proposal[any]) error {
+func (c *EVMChain) Write(props []*proposal.Proposal) error {
 	err := c.executor.Execute(props)
 	if err != nil {
 		c.logger.Err(err).Msgf("error writing proposals %+v on network %d", props, c.DomainID())

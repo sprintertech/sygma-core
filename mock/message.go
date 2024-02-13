@@ -40,10 +40,10 @@ func (m *MockHandler) EXPECT() *MockHandlerMockRecorder {
 }
 
 // HandleMessage mocks base method.
-func (m_2 *MockHandler) HandleMessage(m *message.Message[any]) (*proposal.Proposal[any], error) {
+func (m_2 *MockHandler) HandleMessage(m *message.Message) (*proposal.Proposal, error) {
 	m_2.ctrl.T.Helper()
 	ret := m_2.ctrl.Call(m_2, "HandleMessage", m)
-	ret0, _ := ret[0].(*proposal.Proposal[any])
+	ret0, _ := ret[0].(*proposal.Proposal)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
