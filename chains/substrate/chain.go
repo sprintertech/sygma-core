@@ -35,11 +35,12 @@ type SubstrateChain struct {
 
 func NewSubstrateChain(listener EventListener, messageHandler MessageHandler, executor ProposalExecutor, domainID uint8, startBlock *big.Int) *SubstrateChain {
 	return &SubstrateChain{
-		listener:   listener,
-		executor:   executor,
-		domainID:   domainID,
-		startBlock: startBlock,
-		logger:     log.With().Uint8("domainID", domainID).Logger()}
+		listener:       listener,
+		messageHandler: messageHandler,
+		executor:       executor,
+		domainID:       domainID,
+		startBlock:     startBlock,
+		logger:         log.With().Uint8("domainID", domainID).Logger()}
 }
 
 // PollEvents is the goroutine that polls blocks and searches Deposit events in them.
