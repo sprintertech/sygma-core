@@ -7,3 +7,12 @@ type Proposal struct {
 	Data        interface{}
 	Type        ProposalType
 }
+
+func NewProposal(source uint8, destination uint8, data interface{}, propType ProposalType) *Proposal {
+	return &Proposal{
+		Source:      source,
+		Destination: destination,
+		Data:        data,
+		Type:        propType,
+	}
+}
