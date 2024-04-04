@@ -4,6 +4,7 @@
 package connection
 
 import (
+	"math/big"
 	"sync"
 
 	"github.com/centrifuge/go-substrate-rpc-client/v4/client"
@@ -83,6 +84,23 @@ func (c *Connection) GetBlockEvents(hash types.Hash) ([]*parser.Event, error) {
 	evts, err := eventRetriever.GetEvents(hash)
 	if err != nil {
 		return nil, err
+	}
+	return evts, nil
+}
+
+func (c *Connection) FetchEvents(startBlock, endBlock *big.Int) ([]*parser.Event, error) {
+	evts := make([]*parser.Event, 0)
+	for i := new(big.Int).Set(startBlock); i.Cmp(endBlock) == -1; i.Add(i, big.NewInt(1)) {
+		hash, err := c.GetBlockHash(i.Uint64())
+		if err != nil {
+			return nil, err
+		}
+
+		evt, err := c.GetBlockEvents(hash)
+		if err != nil {
+			return nil, err
+		}
+		evts = append(evts, evt...)
 	}
 	return evts, nil
 }
