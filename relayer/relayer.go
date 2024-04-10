@@ -61,11 +61,12 @@ func (r *Relayer) route(msgs []*message.Message) {
 		return
 	}
 
+	log := log.With().Uint8("domainID", destChain.DomainID()).Str("messageID", msgs[0].ID).Logger()
 	props := make([]*proposal.Proposal, 0)
 	for _, m := range msgs {
 		prop, err := destChain.ReceiveMessage(m)
 		if err != nil {
-			log.Err(err).Uint8("domainID", destChain.DomainID()).Msgf("Failed receiving message %+v", m)
+			log.Err(err).Msgf("Failed receiving message %+v", m)
 			continue
 		}
 		if prop != nil {
@@ -78,7 +79,7 @@ func (r *Relayer) route(msgs []*message.Message) {
 
 	err := destChain.Write(props)
 	if err != nil {
-		log.Err(err).Uint8("domainID", destChain.DomainID()).Msgf("Failed writing message")
+		log.Err(err).Msgf("Failed writing message")
 		return
 	}
 }
