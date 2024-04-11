@@ -62,7 +62,7 @@ func (c *EVMChain) ReceiveMessage(m *message.Message) (*proposal.Proposal, error
 func (c *EVMChain) Write(props []*proposal.Proposal) error {
 	err := c.executor.Execute(props)
 	if err != nil {
-		c.logger.Err(err).Msgf("error writing proposals %+v on network %d", props, c.DomainID())
+		c.logger.Err(err).Str("messageID", props[0].MessageID).Msgf("error writing proposals %+v on network %d", props, c.DomainID())
 		return err
 	}
 
