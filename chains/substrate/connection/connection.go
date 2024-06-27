@@ -90,7 +90,7 @@ func (c *Connection) GetBlockEvents(hash types.Hash) ([]*parser.Event, error) {
 
 func (c *Connection) FetchEvents(startBlock, endBlock *big.Int) ([]*parser.Event, error) {
 	evts := make([]*parser.Event, 0)
-	for i := new(big.Int).Set(startBlock); i.Cmp(endBlock) == -1; i.Add(i, big.NewInt(1)) {
+	for i := new(big.Int).Set(startBlock); i.Cmp(endBlock) <= 0; i.Add(i, big.NewInt(1)) {
 		hash, err := c.GetBlockHash(i.Uint64())
 		if err != nil {
 			return nil, err
