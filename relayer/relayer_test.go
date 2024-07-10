@@ -117,3 +117,18 @@ func (s *RouteTestSuite) TestWritesToChain() {
 		{Destination: 1},
 	})
 }
+
+func (s *RouteTestSuite) Test_Route_ChainDoesNotExist() {
+	props := make([]*proposal.Proposal, 1)
+	prop := &proposal.Proposal{}
+	props[0] = prop
+	chains := make(map[uint8]RelayedChain)
+	chains[1] = s.mockRelayedChain
+	relayer := NewRelayer(
+		chains,
+	)
+
+	relayer.route([]*message.Message{
+		{Destination: 11},
+	})
+}
