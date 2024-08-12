@@ -1,10 +1,13 @@
 module github.com/sygmaprotocol/sygma-core
 
-go 1.19
+go 1.21
+
+toolchain go1.22.2
 
 require (
-	github.com/centrifuge/go-substrate-rpc-client/v4 v4.1.0
+	github.com/centrifuge/go-substrate-rpc-client/v4 v4.2.1
 	github.com/ethereum/go-ethereum v1.13.2
+	github.com/freddyli7/go-substrate-rpc-client/v4 v4.0.0-20240812175100-408e7212ee5c
 	github.com/imdario/mergo v0.3.12
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.25.0
@@ -45,7 +48,7 @@ require (
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/supranational/blst v0.3.11 // indirect
-	github.com/vedhavyas/go-subkey v1.0.4 // indirect
+	github.com/vedhavyas/go-subkey/v2 v2.0.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.16.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.39.0 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
