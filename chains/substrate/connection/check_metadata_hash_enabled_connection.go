@@ -7,17 +7,17 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/freddyli7/go-substrate-rpc-client/v4/client"
-	"github.com/freddyli7/go-substrate-rpc-client/v4/registry/parser"
-	"github.com/freddyli7/go-substrate-rpc-client/v4/registry/retriever"
-	"github.com/freddyli7/go-substrate-rpc-client/v4/registry/state"
+	"github.com/sygmaprotocol/go-substrate-rpc-client/v4/client"
+	"github.com/sygmaprotocol/go-substrate-rpc-client/v4/registry/parser"
+	"github.com/sygmaprotocol/go-substrate-rpc-client/v4/registry/retriever"
+	"github.com/sygmaprotocol/go-substrate-rpc-client/v4/registry/state"
 
-	"github.com/freddyli7/go-substrate-rpc-client/v4/rpc"
-	"github.com/freddyli7/go-substrate-rpc-client/v4/rpc/chain"
-	"github.com/freddyli7/go-substrate-rpc-client/v4/types"
+	"github.com/sygmaprotocol/go-substrate-rpc-client/v4/rpc"
+	"github.com/sygmaprotocol/go-substrate-rpc-client/v4/rpc/chain"
+	"github.com/sygmaprotocol/go-substrate-rpc-client/v4/types"
 )
 
-type ConnectionCheckMetadataModeEnabled struct {
+type CheckMetadataModeEnabledConnection struct {
 	chain.Chain
 	client.Client
 	*rpc.RPC
@@ -26,7 +26,7 @@ type ConnectionCheckMetadataModeEnabled struct {
 	GenesisHash types.Hash     // Chain genesis hash
 }
 
-func NewSubstrateConnectionCheckMetadataModeEnabled(url string) (*ConnectionCheckMetadataModeEnabled, error) {
+func NewCheckMetadataModeEnabledSubstrateConnection(url string) (*CheckMetadataModeEnabledConnection, error) {
 	client, err := client.Connect(url)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func NewSubstrateConnectionCheckMetadataModeEnabled(url string) (*ConnectionChec
 		return nil, err
 	}
 
-	return &ConnectionCheckMetadataModeEnabled{
+	return &CheckMetadataModeEnabledConnection{
 		meta: *meta,
 
 		RPC:         rpc,
@@ -55,14 +55,14 @@ func NewSubstrateConnectionCheckMetadataModeEnabled(url string) (*ConnectionChec
 	}, nil
 }
 
-func (c *ConnectionCheckMetadataModeEnabled) GetMetadata() (meta types.Metadata) {
+func (c *CheckMetadataModeEnabledConnection) GetMetadata() (meta types.Metadata) {
 	c.metaLock.RLock()
 	meta = c.meta
 	c.metaLock.RUnlock()
 	return meta
 }
 
-func (c *ConnectionCheckMetadataModeEnabled) UpdateMetatdata() error {
+func (c *CheckMetadataModeEnabledConnection) UpdateMetatdata() error {
 	c.metaLock.Lock()
 	meta, err := c.RPC.State.GetMetadataLatest()
 	if err != nil {
@@ -74,7 +74,7 @@ func (c *ConnectionCheckMetadataModeEnabled) UpdateMetatdata() error {
 	return nil
 }
 
-func (c *ConnectionCheckMetadataModeEnabled) GetBlockEvents(hash types.Hash) ([]*parser.Event, error) {
+func (c *CheckMetadataModeEnabledConnection) GetBlockEvents(hash types.Hash) ([]*parser.Event, error) {
 	provider := state.NewEventProvider(c.State)
 	eventRetriever, err := retriever.NewDefaultEventRetriever(provider, c.State)
 	if err != nil {
@@ -88,7 +88,7 @@ func (c *ConnectionCheckMetadataModeEnabled) GetBlockEvents(hash types.Hash) ([]
 	return evts, nil
 }
 
-func (c *ConnectionCheckMetadataModeEnabled) FetchEvents(startBlock, endBlock *big.Int) ([]*parser.Event, error) {
+func (c *CheckMetadataModeEnabledConnection) FetchEvents(startBlock, endBlock *big.Int) ([]*parser.Event, error) {
 	evts := make([]*parser.Event, 0)
 	for i := new(big.Int).Set(startBlock); i.Cmp(endBlock) <= 0; i.Add(i, big.NewInt(1)) {
 		hash, err := c.GetBlockHash(i.Uint64())

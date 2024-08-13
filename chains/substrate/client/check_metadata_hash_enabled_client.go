@@ -11,26 +11,26 @@ import (
 	"sync"
 	"time"
 
-	"github.com/freddyli7/go-substrate-rpc-client/v4/rpc/author"
-	"github.com/freddyli7/go-substrate-rpc-client/v4/scale"
-	"github.com/freddyli7/go-substrate-rpc-client/v4/signature"
-	"github.com/freddyli7/go-substrate-rpc-client/v4/types"
 	"github.com/rs/zerolog/log"
+	"github.com/sygmaprotocol/go-substrate-rpc-client/v4/rpc/author"
+	"github.com/sygmaprotocol/go-substrate-rpc-client/v4/scale"
+	"github.com/sygmaprotocol/go-substrate-rpc-client/v4/signature"
+	"github.com/sygmaprotocol/go-substrate-rpc-client/v4/types"
 	"github.com/sygmaprotocol/sygma-core/chains/substrate/connection"
 	"github.com/sygmaprotocol/sygma-core/chains/substrate/events"
 )
 
-type SubstrateClientCheckMetadataModeEnabled struct {
+type SubstrateCheckMetadataModeEnabledClient struct {
 	key       *signature.KeyringPair // Keyring used for signing
 	nonceLock sync.Mutex             // Locks nonce for updates
 	nonce     types.U32              // Latest account nonce
 	tip       uint64
-	Conn      *connection.ConnectionCheckMetadataModeEnabled
+	Conn      *connection.CheckMetadataModeEnabledConnection
 	ChainID   *big.Int
 }
 
-func NewSubstrateClientCheckMetadataModeEnabled(conn *connection.ConnectionCheckMetadataModeEnabled, key *signature.KeyringPair, chainID *big.Int, tip uint64) *SubstrateClientCheckMetadataModeEnabled {
-	return &SubstrateClientCheckMetadataModeEnabled{
+func NewSubstrateClientCheckMetadataModeEnabled(conn *connection.CheckMetadataModeEnabledConnection, key *signature.KeyringPair, chainID *big.Int, tip uint64) *SubstrateCheckMetadataModeEnabledClient {
+	return &SubstrateCheckMetadataModeEnabledClient{
 		key:     key,
 		Conn:    conn,
 		ChainID: chainID,
@@ -40,7 +40,7 @@ func NewSubstrateClientCheckMetadataModeEnabled(conn *connection.ConnectionCheck
 
 // Transact constructs and submits an extrinsic to call the method with the given arguments.
 // All args are passed directly into GSRPC. GSRPC types are recommended to avoid serialization inconsistencies.
-func (c *SubstrateClientCheckMetadataModeEnabled) Transact(method string, args ...interface{}) (types.Hash, *author.ExtrinsicStatusSubscription, error) {
+func (c *SubstrateCheckMetadataModeEnabledClient) Transact(method string, args ...interface{}) (types.Hash, *author.ExtrinsicStatusSubscription, error) {
 	log.Debug().Msgf("Submitting substrate call... method %s, sender %s", method, c.key.Address)
 
 	// Create call and extrinsic
@@ -96,7 +96,7 @@ func (c *SubstrateClientCheckMetadataModeEnabled) Transact(method string, args .
 	return hash, sub, nil
 }
 
-func (c *SubstrateClientCheckMetadataModeEnabled) TrackExtrinsic(extHash types.Hash, sub *author.ExtrinsicStatusSubscription) error {
+func (c *SubstrateCheckMetadataModeEnabledClient) TrackExtrinsic(extHash types.Hash, sub *author.ExtrinsicStatusSubscription) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Minute*10))
 	defer sub.Unsubscribe()
 	defer cancel()
@@ -119,7 +119,7 @@ func (c *SubstrateClientCheckMetadataModeEnabled) TrackExtrinsic(extHash types.H
 	}
 }
 
-func (c *SubstrateClientCheckMetadataModeEnabled) nextNonce(meta *types.Metadata) (types.U32, error) {
+func (c *SubstrateCheckMetadataModeEnabledClient) nextNonce(meta *types.Metadata) (types.U32, error) {
 	key, err := types.CreateStorageKey(meta, "System", "Account", c.key.PublicKey, nil)
 	if err != nil {
 		return 0, err
@@ -145,7 +145,7 @@ func (c *SubstrateClientCheckMetadataModeEnabled) nextNonce(meta *types.Metadata
 	return latestNonce, nil
 }
 
-func (c *SubstrateClientCheckMetadataModeEnabled) submitAndWatchExtrinsic(opts types.SignatureOptions, ext *types.Extrinsic) (*author.ExtrinsicStatusSubscription, error) {
+func (c *SubstrateCheckMetadataModeEnabledClient) submitAndWatchExtrinsic(opts types.SignatureOptions, ext *types.Extrinsic) (*author.ExtrinsicStatusSubscription, error) {
 	err := ext.Sign(*c.key, opts)
 	if err != nil {
 		return nil, err
@@ -159,7 +159,7 @@ func (c *SubstrateClientCheckMetadataModeEnabled) submitAndWatchExtrinsic(opts t
 	return sub, nil
 }
 
-func (c *SubstrateClientCheckMetadataModeEnabled) checkExtrinsicSuccess(extHash types.Hash, blockHash types.Hash) error {
+func (c *SubstrateCheckMetadataModeEnabledClient) checkExtrinsicSuccess(extHash types.Hash, blockHash types.Hash) error {
 	block, err := c.Conn.Chain.GetBlock(blockHash)
 	if err != nil {
 		return err
@@ -195,7 +195,7 @@ func (c *SubstrateClientCheckMetadataModeEnabled) checkExtrinsicSuccess(extHash 
 	return fmt.Errorf("no event found")
 }
 
-func (c *SubstrateClientCheckMetadataModeEnabled) LatestBlock() (*big.Int, error) {
+func (c *SubstrateCheckMetadataModeEnabledClient) LatestBlock() (*big.Int, error) {
 	block, err := c.Conn.Chain.GetBlockLatest()
 	if err != nil {
 		return nil, err
