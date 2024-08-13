@@ -26,7 +26,7 @@ type CheckMetadataModeEnabledConnection struct {
 	GenesisHash types.Hash     // Chain genesis hash
 }
 
-func NewCheckMetadataModeEnabledSubstrateConnection(url string) (*CheckMetadataModeEnabledConnection, error) {
+func NewCheckMetadataModeEnabledConnection(url string) (*CheckMetadataModeEnabledConnection, error) {
 	client, err := client.Connect(url)
 	if err != nil {
 		return nil, err

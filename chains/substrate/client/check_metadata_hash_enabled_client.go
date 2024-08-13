@@ -29,7 +29,7 @@ type SubstrateCheckMetadataModeEnabledClient struct {
 	ChainID   *big.Int
 }
 
-func NewSubstrateClientCheckMetadataModeEnabled(conn *connection.CheckMetadataModeEnabledConnection, key *signature.KeyringPair, chainID *big.Int, tip uint64) *SubstrateCheckMetadataModeEnabledClient {
+func NewSubstrateCheckMetadataModeEnabledClient(conn *connection.CheckMetadataModeEnabledConnection, key *signature.KeyringPair, chainID *big.Int, tip uint64) *SubstrateCheckMetadataModeEnabledClient {
 	return &SubstrateCheckMetadataModeEnabledClient{
 		key:     key,
 		Conn:    conn,
