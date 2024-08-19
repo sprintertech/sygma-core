@@ -5,13 +5,12 @@ go 1.21
 toolchain go1.22.2
 
 require (
-	github.com/centrifuge/go-substrate-rpc-client/v4 v4.2.1
+	github.com/centrifuge/go-substrate-rpc-client/v4 v4.2.2-0.20240724202640-8bafff8c25ea
 	github.com/ethereum/go-ethereum v1.13.2
 	github.com/imdario/mergo v0.3.12
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.25.0
 	github.com/stretchr/testify v1.8.3
-	github.com/sygmaprotocol/go-substrate-rpc-client/v4 v4.2.2-0.20240813185906-0395c914c6f8
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v0.39.0

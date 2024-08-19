@@ -7,6 +7,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types/extrinsic"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types/extrinsic/extensions"
 	"math/big"
 	"sync"
 	"time"
@@ -54,7 +56,9 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 		return types.Hash{}, nil, fmt.Errorf("failed to construct call: %w", err)
 	}
 
-	ext := types.NewExtrinsic(call)
+	//ext := types.NewExtrinsic(call)
+	ext := extrinsic.NewDynamicExtrinsic(&call)
+
 	// Get latest runtime version
 	rv, err := c.Conn.RPC.State.GetRuntimeVersionLatest()
 	if err != nil {
@@ -70,21 +74,32 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 	}
 
 	// Sign the extrinsic
-	o := types.SignatureOptions{
-		BlockHash:          c.Conn.GenesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.Conn.GenesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(nonce)),
-		SpecVersion:        rv.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(c.tip),
-		TransactionVersion: rv.TransactionVersion,
-	}
-	sub, err := c.submitAndWatchExtrinsic(o, &ext)
+	//o := types.SignatureOptions{
+	//	BlockHash:          c.Conn.GenesisHash,
+	//	Era:                types.ExtrinsicEra{IsMortalEra: false},
+	//	GenesisHash:        c.Conn.GenesisHash,
+	//	Nonce:              types.NewUCompactFromUInt(uint64(nonce)),
+	//	SpecVersion:        rv.SpecVersion,
+	//	Tip:                types.NewUCompactFromUInt(c.tip),
+	//	TransactionVersion: rv.TransactionVersion,
+	//}
+
+	sub, err := c.submitAndWatchExtrinsic(
+		&meta,
+		ext,
+		extrinsic.WithEra(types.ExtrinsicEra{IsMortalEra: false}, c.Conn.GenesisHash),
+		extrinsic.WithNonce(types.NewUCompactFromUInt(uint64(nonce))),
+		extrinsic.WithTip(types.NewUCompactFromUInt(c.tip)),
+		extrinsic.WithSpecVersion(rv.SpecVersion),
+		extrinsic.WithTransactionVersion(rv.TransactionVersion),
+		extrinsic.WithGenesisHash(c.Conn.GenesisHash),
+		extrinsic.WithMetadataMode(extensions.CheckMetadataModeDisabled, extensions.CheckMetadataHash{Hash: types.NewEmptyOption[types.H256]()}),
+	)
 	if err != nil {
 		return types.Hash{}, nil, fmt.Errorf("submission of extrinsic failed: %w", err)
 	}
 
-	hash, err := ExtrinsicHash(ext)
+	hash, err := DynamicExtrinsicHash(ext)
 	if err != nil {
 		return types.Hash{}, nil, err
 	}
@@ -144,13 +159,13 @@ func (c *SubstrateClient) nextNonce(meta *types.Metadata) (types.U32, error) {
 	return latestNonce, nil
 }
 
-func (c *SubstrateClient) submitAndWatchExtrinsic(opts types.SignatureOptions, ext *types.Extrinsic) (*author.ExtrinsicStatusSubscription, error) {
-	err := ext.Sign(*c.key, opts)
+func (c *SubstrateClient) submitAndWatchExtrinsic(meta *types.Metadata, ext extrinsic.DynamicExtrinsic, opts ...extrinsic.SigningOption) (*author.ExtrinsicStatusSubscription, error) {
+	err := ext.Sign(*c.key, meta, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	sub, err := c.Conn.RPC.Author.SubmitAndWatchExtrinsic(*ext)
+	sub, err := c.Conn.RPC.Author.SubmitAndWatchDynamicExtrinsic(ext)
 	if err != nil {
 		return nil, err
 	}
@@ -203,6 +218,16 @@ func (c *SubstrateClient) LatestBlock() (*big.Int, error) {
 }
 
 func ExtrinsicHash(ext types.Extrinsic) (types.Hash, error) {
+	extHash := bytes.NewBuffer([]byte{})
+	encoder := scale.NewEncoder(extHash)
+	err := ext.Encode(*encoder)
+	if err != nil {
+		return types.Hash{}, err
+	}
+	return types.NewHash(extHash.Bytes()), nil
+}
+
+func DynamicExtrinsicHash(ext extrinsic.DynamicExtrinsic) (types.Hash, error) {
 	extHash := bytes.NewBuffer([]byte{})
 	encoder := scale.NewEncoder(extHash)
 	err := ext.Encode(*encoder)
