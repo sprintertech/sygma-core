@@ -87,7 +87,7 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 	sub, err := c.submitAndWatchExtrinsic(
 		&meta,
 		ext,
-		extrinsic.WithEra(types.ExtrinsicEra{IsMortalEra: false}, c.Conn.GenesisHash),
+		extrinsic.WithEra(types.ExtrinsicEra{IsImmortalEra: true}, c.Conn.GenesisHash),
 		extrinsic.WithNonce(types.NewUCompactFromUInt(uint64(nonce))),
 		extrinsic.WithTip(types.NewUCompactFromUInt(c.tip)),
 		extrinsic.WithSpecVersion(rv.SpecVersion),
