@@ -56,7 +56,6 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 		return types.Hash{}, nil, fmt.Errorf("failed to construct call: %w", err)
 	}
 
-	//ext := types.NewExtrinsic(call)
 	ext := extrinsic.NewDynamicExtrinsic(&call)
 
 	// Get latest runtime version
@@ -74,16 +73,6 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 	}
 
 	// Sign the extrinsic
-	//o := types.SignatureOptions{
-	//	BlockHash:          c.Conn.GenesisHash,
-	//	Era:                types.ExtrinsicEra{IsMortalEra: false},
-	//	GenesisHash:        c.Conn.GenesisHash,
-	//	Nonce:              types.NewUCompactFromUInt(uint64(nonce)),
-	//	SpecVersion:        rv.SpecVersion,
-	//	Tip:                types.NewUCompactFromUInt(c.tip),
-	//	TransactionVersion: rv.TransactionVersion,
-	//}
-
 	sub, err := c.submitAndWatchExtrinsic(
 		&meta,
 		ext,
