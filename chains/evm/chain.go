@@ -5,6 +5,7 @@ package evm
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	"github.com/rs/zerolog"
@@ -51,15 +52,27 @@ func NewEVMChain(listener EventListener, messageHandler MessageHandler, executor
 // PollEvents is the goroutine that polls blocks and searches Deposit events in them.
 // Events are then sent to eventsChan.
 func (c *EVMChain) PollEvents(ctx context.Context) {
+	if c.listener == nil {
+		return
+	}
+
 	c.logger.Info().Str("startBlock", c.startBlock.String()).Msg("Polling Blocks...")
 	go c.listener.ListenToEvents(ctx, c.startBlock)
 }
 
 func (c *EVMChain) ReceiveMessage(m *message.Message) (*proposal.Proposal, error) {
+	if c.messageHandler == nil {
+		return nil, fmt.Errorf("message handler not configured")
+	}
+
 	return c.messageHandler.HandleMessage(m)
 }
 
 func (c *EVMChain) Write(props []*proposal.Proposal) error {
+	if c.executor == nil {
+		return fmt.Errorf("executor not configured")
+	}
+
 	err := c.executor.Execute(props)
 	if err != nil {
 		c.logger.Err(err).Str("messageID", props[0].MessageID).Msgf("error writing proposals %+v on network %d", props, c.DomainID())
