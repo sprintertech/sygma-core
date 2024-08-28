@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/extrinsic"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/extrinsic/extensions"
 	"math/big"
@@ -14,7 +15,6 @@ import (
 	"time"
 
 	"github.com/centrifuge/go-substrate-rpc-client/v4/rpc/author"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/rs/zerolog/log"
@@ -56,7 +56,7 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 		return types.Hash{}, nil, fmt.Errorf("failed to construct call: %w", err)
 	}
 
-	ext := extrinsic.NewDynamicExtrinsic(&call)
+	ext := extrinsic.NewExtrinsic(call)
 
 	// Get latest runtime version
 	rv, err := c.Conn.RPC.State.GetRuntimeVersionLatest()
@@ -87,8 +87,7 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 	if err != nil {
 		return types.Hash{}, nil, fmt.Errorf("submission of extrinsic failed: %w", err)
 	}
-
-	hash, err := DynamicExtrinsicHash(ext)
+	hash, err := ExtrinsicHash(ext)
 	if err != nil {
 		return types.Hash{}, nil, err
 	}
@@ -148,13 +147,13 @@ func (c *SubstrateClient) nextNonce(meta *types.Metadata) (types.U32, error) {
 	return latestNonce, nil
 }
 
-func (c *SubstrateClient) submitAndWatchExtrinsic(meta *types.Metadata, ext extrinsic.DynamicExtrinsic, opts ...extrinsic.SigningOption) (*author.ExtrinsicStatusSubscription, error) {
+func (c *SubstrateClient) submitAndWatchExtrinsic(meta *types.Metadata, ext extrinsic.Extrinsic, opts ...extrinsic.SigningOption) (*author.ExtrinsicStatusSubscription, error) {
 	err := ext.Sign(*c.key, meta, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	sub, err := c.Conn.RPC.Author.SubmitAndWatchDynamicExtrinsic(ext)
+	sub, err := c.Conn.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
 		return nil, err
 	}
@@ -174,11 +173,21 @@ func (c *SubstrateClient) checkExtrinsicSuccess(extHash types.Hash, blockHash ty
 	}
 
 	for _, event := range evts {
+		fmt.Println("event name:", event.Name)
+
 		index := event.Phase.AsApplyExtrinsic
+		// TODO: we init a DynamicExtrinsic when sending tx, we expect a DynamicExtrinsic from each block, not Extrinsic
+		// this is the fix for E2E CI deposit from substrate to evm, Test_Erc20Deposit_Substrate_to_EVM works but when checking if checkExtrinsicSuccess failed bcs of the hash mismatch
+		// Test_Erc20Deposit_EVM_to_Substrate works fine
+
+		//hash, err := DynamicExtrinsicHash(block.Block.Extrinsics[index])
 		hash, err := ExtrinsicHash(block.Block.Extrinsics[index])
 		if err != nil {
 			return err
 		}
+
+		fmt.Println("extHash:", extHash.Hex())
+		fmt.Println("hash:", hash.Hex())
 
 		if extHash != hash {
 			continue
@@ -206,7 +215,7 @@ func (c *SubstrateClient) LatestBlock() (*big.Int, error) {
 	return big.NewInt(int64(block.Block.Header.Number)), nil
 }
 
-func ExtrinsicHash(ext types.Extrinsic) (types.Hash, error) {
+func ExtrinsicHash(ext extrinsic.Extrinsic) (types.Hash, error) {
 	extHash := bytes.NewBuffer([]byte{})
 	encoder := scale.NewEncoder(extHash)
 	err := ext.Encode(*encoder)
@@ -216,12 +225,12 @@ func ExtrinsicHash(ext types.Extrinsic) (types.Hash, error) {
 	return types.NewHash(extHash.Bytes()), nil
 }
 
-func DynamicExtrinsicHash(ext extrinsic.DynamicExtrinsic) (types.Hash, error) {
-	extHash := bytes.NewBuffer([]byte{})
-	encoder := scale.NewEncoder(extHash)
-	err := ext.Encode(*encoder)
-	if err != nil {
-		return types.Hash{}, err
-	}
-	return types.NewHash(extHash.Bytes()), nil
-}
+//func DynamicExtrinsicHash(ext extrinsic.DynamicExtrinsic) (types.Hash, error) {
+//	extHash := bytes.NewBuffer([]byte{})
+//	encoder := scale.NewEncoder(extHash)
+//	err := ext.Encode(*encoder)
+//	if err != nil {
+//		return types.Hash{}, err
+//	}
+//	return types.NewHash(extHash.Bytes()), nil
+//}
