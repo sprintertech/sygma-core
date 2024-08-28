@@ -173,21 +173,11 @@ func (c *SubstrateClient) checkExtrinsicSuccess(extHash types.Hash, blockHash ty
 	}
 
 	for _, event := range evts {
-		fmt.Println("event name:", event.Name)
-
 		index := event.Phase.AsApplyExtrinsic
-		// TODO: we init a DynamicExtrinsic when sending tx, we expect a DynamicExtrinsic from each block, not Extrinsic
-		// this is the fix for E2E CI deposit from substrate to evm, Test_Erc20Deposit_Substrate_to_EVM works but when checking if checkExtrinsicSuccess failed bcs of the hash mismatch
-		// Test_Erc20Deposit_EVM_to_Substrate works fine
-
-		//hash, err := DynamicExtrinsicHash(block.Block.Extrinsics[index])
 		hash, err := ExtrinsicHash(block.Block.Extrinsics[index])
 		if err != nil {
 			return err
 		}
-
-		fmt.Println("extHash:", extHash.Hex())
-		fmt.Println("hash:", hash.Hex())
 
 		if extHash != hash {
 			continue
@@ -224,13 +214,3 @@ func ExtrinsicHash(ext extrinsic.Extrinsic) (types.Hash, error) {
 	}
 	return types.NewHash(extHash.Bytes()), nil
 }
-
-//func DynamicExtrinsicHash(ext extrinsic.DynamicExtrinsic) (types.Hash, error) {
-//	extHash := bytes.NewBuffer([]byte{})
-//	encoder := scale.NewEncoder(extHash)
-//	err := ext.Encode(*encoder)
-//	if err != nil {
-//		return types.Hash{}, err
-//	}
-//	return types.NewHash(extHash.Bytes()), nil
-//}
