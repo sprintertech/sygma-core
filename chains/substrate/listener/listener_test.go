@@ -3,6 +3,7 @@ package listener_test
 import (
 	"context"
 	"fmt"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types/block"
 	"math/big"
 	"testing"
 	"time"
@@ -69,8 +70,8 @@ func (s *ListenerTestSuite) Test_ListenToEvents_RetriesIfBlockUnavailable() {
 
 func (s *ListenerTestSuite) Test_ListenToEvents_SleepsIfBlockTooNew() {
 	s.mockClient.EXPECT().GetFinalizedHead().Return(types.Hash{}, nil)
-	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&types.SignedBlock{
-		Block: types.Block{
+	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&block.SignedBlock{
+		Block: block.Block{
 			Header: types.Header{
 				Number: 104,
 			},
@@ -91,8 +92,8 @@ func (s *ListenerTestSuite) Test_ListenToEvents_RetriesInCaseOfHandlerFailure() 
 
 	// First pass
 	s.mockClient.EXPECT().GetFinalizedHead().Return(types.Hash{}, nil)
-	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&types.SignedBlock{
-		Block: types.Block{
+	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&block.SignedBlock{
+		Block: block.Block{
 			Header: types.Header{
 				Number: types.BlockNumber(head.Int64()),
 			},
@@ -102,8 +103,8 @@ func (s *ListenerTestSuite) Test_ListenToEvents_RetriesInCaseOfHandlerFailure() 
 	s.mockEventHandler.EXPECT().HandleEvents(startBlock, new(big.Int).Sub(endBlock, big.NewInt(1))).Return(fmt.Errorf("error"))
 	// Second pass
 	s.mockClient.EXPECT().GetFinalizedHead().Return(types.Hash{}, nil)
-	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&types.SignedBlock{
-		Block: types.Block{
+	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&block.SignedBlock{
+		Block: block.Block{
 			Header: types.Header{
 				Number: types.BlockNumber(head.Int64()),
 			},
@@ -115,8 +116,8 @@ func (s *ListenerTestSuite) Test_ListenToEvents_RetriesInCaseOfHandlerFailure() 
 	s.mockBlockStorer.EXPECT().StoreBlock(endBlock, s.domainID).Return(nil)
 	// third pass
 	s.mockClient.EXPECT().GetFinalizedHead().Return(types.Hash{}, nil)
-	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&types.SignedBlock{
-		Block: types.Block{
+	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&block.SignedBlock{
+		Block: block.Block{
 			Header: types.Header{
 				Number: 100,
 			},
@@ -138,8 +139,8 @@ func (s *ListenerTestSuite) Test_ListenToEvents_IgnoresBlockStorerError() {
 
 	// First pass
 	s.mockClient.EXPECT().GetFinalizedHead().Return(types.Hash{}, nil)
-	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&types.SignedBlock{
-		Block: types.Block{
+	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&block.SignedBlock{
+		Block: block.Block{
 			Header: types.Header{
 				Number: types.BlockNumber(head.Int64()),
 			},
@@ -151,8 +152,8 @@ func (s *ListenerTestSuite) Test_ListenToEvents_IgnoresBlockStorerError() {
 	s.mockBlockStorer.EXPECT().StoreBlock(endBlock, s.domainID).Return(fmt.Errorf("error"))
 	// second pass
 	s.mockClient.EXPECT().GetFinalizedHead().Return(types.Hash{}, nil)
-	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&types.SignedBlock{
-		Block: types.Block{
+	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&block.SignedBlock{
+		Block: block.Block{
 			Header: types.Header{
 				Number: 95,
 			},
@@ -173,24 +174,24 @@ func (s *ListenerTestSuite) Test_ListenToEvents_UsesHeadAsStartBlockIfNilPassed(
 	newHead := big.NewInt(120)
 
 	s.mockClient.EXPECT().GetFinalizedHead().Return(types.Hash{}, nil)
-	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&types.SignedBlock{
-		Block: types.Block{
+	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&block.SignedBlock{
+		Block: block.Block{
 			Header: types.Header{
 				Number: types.BlockNumber(oldHead.Int64()),
 			},
 		},
 	}, nil)
 	s.mockClient.EXPECT().GetFinalizedHead().Return(types.Hash{}, nil)
-	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&types.SignedBlock{
-		Block: types.Block{
+	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&block.SignedBlock{
+		Block: block.Block{
 			Header: types.Header{
 				Number: types.BlockNumber(newHead.Int64()),
 			},
 		},
 	}, nil)
 	s.mockClient.EXPECT().GetFinalizedHead().Return(types.Hash{}, nil)
-	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&types.SignedBlock{
-		Block: types.Block{
+	s.mockClient.EXPECT().GetBlock(gomock.Any()).Return(&block.SignedBlock{
+		Block: block.Block{
 			Header: types.Header{
 				Number: types.BlockNumber(95),
 			},
