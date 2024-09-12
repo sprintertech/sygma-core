@@ -174,12 +174,19 @@ func (c *SubstrateClient) checkExtrinsicSuccess(extHash types.Hash, blockHash ty
 
 	for _, event := range evts {
 		index := event.Phase.AsApplyExtrinsic
-		hash, err := ExtrinsicHash(block.Block.Extrinsics[index])
-		if err != nil {
-			return err
-		}
+		//hash, err := ExtrinsicHash(block.Block.Extrinsics[index])
+		//if err != nil {
+		//	return err
+		//}
 
-		if extHash != hash {
+		// maybe the string of block.Block.Extrinsics[index] is already the hash of the extrinsic? so just need to convert it
+		// into the Hash type
+		extStr := block.Block.Extrinsics[index]
+		fmt.Println("extStr: ", extStr)
+		fmt.Println("Hash of extStr: ", types.NewHash([]byte(extStr)))
+		fmt.Println("extHash: ", extHash)
+
+		if extHash != types.NewHash([]byte(extStr)) {
 			continue
 		}
 

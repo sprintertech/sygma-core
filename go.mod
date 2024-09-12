@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.22.2
 
 require (
-	github.com/centrifuge/go-substrate-rpc-client/v4 v4.2.2-0.20240828124242-98590585d03d
+	github.com/centrifuge/go-substrate-rpc-client/v4 v4.2.2-0.20240912121921-99d0eb39e55a
 	github.com/ethereum/go-ethereum v1.13.2
 	github.com/imdario/mergo v0.3.12
 	github.com/pkg/errors v0.9.1
