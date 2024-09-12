@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/extrinsic"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/extrinsic/extensions"
 	"math/big"
@@ -179,14 +180,21 @@ func (c *SubstrateClient) checkExtrinsicSuccess(extHash types.Hash, blockHash ty
 		//	return err
 		//}
 
-		// maybe the string of block.Block.Extrinsics[index] is already the hash of the extrinsic? so just need to convert it
-		// into the Hash type
-		extStr := block.Block.Extrinsics[index]
-		fmt.Println("extStr: ", extStr)
-		fmt.Println("Hash of extStr: ", types.NewHash([]byte(extStr)))
-		fmt.Println("extHash: ", extHash)
+		var ext extrinsic.Extrinsic
+		err := codec.DecodeFromHex(block.Block.Extrinsics[index], ext)
+		if err != nil {
+			return err
+		}
+		afterHash, err := ExtrinsicHash(ext)
+		if err != nil {
+			return err
+		}
 
-		if extHash != types.NewHash([]byte(extStr)) {
+		fmt.Println("afterHash: ", afterHash)
+		fmt.Println("extHash: ", extHash)
+		fmt.Println("==========")
+
+		if extHash != afterHash {
 			continue
 		}
 
