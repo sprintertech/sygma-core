@@ -181,7 +181,7 @@ func (c *SubstrateClient) checkExtrinsicSuccess(extHash types.Hash, blockHash ty
 		//}
 
 		var ext extrinsic.Extrinsic
-		err := codec.DecodeFromHex(block.Block.Extrinsics[index], ext)
+		err := codec.DecodeFromHex(block.Block.Extrinsics[index], &ext)
 		if err != nil {
 			return err
 		}
