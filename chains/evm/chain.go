@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"reflect"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -52,7 +53,7 @@ func NewEVMChain(listener EventListener, messageHandler MessageHandler, executor
 // PollEvents is the goroutine that polls blocks and searches Deposit events in them.
 // Events are then sent to eventsChan.
 func (c *EVMChain) PollEvents(ctx context.Context) {
-	if c.listener == nil {
+	if reflect.ValueOf(c.listener).IsNil() {
 		return
 	}
 
@@ -61,7 +62,7 @@ func (c *EVMChain) PollEvents(ctx context.Context) {
 }
 
 func (c *EVMChain) ReceiveMessage(m *message.Message) (*proposal.Proposal, error) {
-	if c.messageHandler == nil {
+	if reflect.ValueOf(c.messageHandler).IsNil() {
 		return nil, fmt.Errorf("message handler not configured")
 	}
 
@@ -69,7 +70,7 @@ func (c *EVMChain) ReceiveMessage(m *message.Message) (*proposal.Proposal, error
 }
 
 func (c *EVMChain) Write(props []*proposal.Proposal) error {
-	if c.executor == nil {
+	if reflect.ValueOf(c.executor).IsNil() {
 		return fmt.Errorf("executor not configured")
 	}
 
