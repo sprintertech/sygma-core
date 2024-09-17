@@ -2,6 +2,7 @@ package monitored
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"sync"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/sygmaprotocol/sygma-core/chains/evm/client"
 	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor"
 	"github.com/sygmaprotocol/sygma-core/chains/evm/transactor/transaction"
+	"github.com/sygmaprotocol/sygma-core/utils"
 )
 
 type GasPricer interface {
@@ -26,6 +28,7 @@ type RawTx struct {
 	gasLimit     uint64
 	gasPrice     []*big.Int
 	data         []byte
+	errChn       chan error
 	submitTime   time.Time
 	creationTime time.Time
 }
@@ -94,6 +97,7 @@ func (t *MonitoredTransactor) Transact(to *common.Address, data []byte, opts tra
 		gasLimit:     opts.GasLimit,
 		gasPrice:     gp,
 		data:         data,
+		errChn:       opts.ErrChn,
 		submitTime:   time.Now(),
 		creationTime: time.Now(),
 	}
@@ -145,8 +149,10 @@ func (t *MonitoredTransactor) Monitor(
 					if err == nil {
 						if receipt.Status == types.ReceiptStatusSuccessful {
 							log.Info().Uint64("nonce", tx.nonce).Msgf("Executed transaction %s with nonce %d", oldHash, tx.nonce)
+							utils.TrySendError(tx.errChn, nil)
 						} else {
 							log.Error().Uint64("nonce", tx.nonce).Msgf("Transaction %s failed on chain", oldHash)
+							utils.TrySendError(tx.errChn, fmt.Errorf("transaction %s failed on chain with nonce %d", oldHash, tx.nonce))
 						}
 
 						delete(t.pendingTxns, oldHash)
@@ -155,6 +161,7 @@ func (t *MonitoredTransactor) Monitor(
 
 					if time.Since(tx.creationTime) > txTimeout {
 						log.Error().Uint64("nonce", tx.nonce).Msgf("Transaction %s has timed out", oldHash)
+						utils.TrySendError(tx.errChn, fmt.Errorf("transaction %s has timed out", oldHash))
 						delete(t.pendingTxns, oldHash)
 						continue
 					}

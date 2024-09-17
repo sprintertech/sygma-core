@@ -95,9 +95,16 @@ func (s *RouteTestSuite) TestWriteFails() {
 		chains,
 	)
 
+	errChn := make(chan error, 1)
 	relayer.route([]*message.Message{
-		{Destination: 1},
+		{
+			Destination: 1,
+			ErrChn:      errChn,
+		},
 	})
+
+	err := <-errChn
+	s.NotNil(err)
 }
 
 func (s *RouteTestSuite) TestWritesToChain() {
@@ -113,8 +120,35 @@ func (s *RouteTestSuite) TestWritesToChain() {
 		chains,
 	)
 
+	errChn := make(chan error, 1)
 	relayer.route([]*message.Message{
-		{Destination: 1},
+		{
+			Destination: 1,
+			ErrChn:      errChn,
+		},
+	})
+
+	err := <-errChn
+	s.Nil(err)
+}
+
+func (s *RouteTestSuite) TestWritesToChain_BlockingErrChn() {
+	props := make([]*proposal.Proposal, 1)
+	prop := &proposal.Proposal{}
+	props[0] = prop
+	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(prop, nil)
+	s.mockRelayedChain.EXPECT().Write(props).Return(nil)
+	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(1)
+	chains := make(map[uint8]RelayedChain)
+	chains[1] = s.mockRelayedChain
+	relayer := NewRelayer(
+		chains,
+	)
+
+	relayer.route([]*message.Message{
+		{
+			Destination: 1,
+		},
 	})
 }
 

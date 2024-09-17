@@ -5,10 +5,12 @@ package relayer
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
 	"github.com/sygmaprotocol/sygma-core/relayer/message"
 	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
+	"github.com/sygmaprotocol/sygma-core/utils"
 )
 
 type RelayedChain interface {
@@ -55,9 +57,11 @@ func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message) {
 
 // Route function routes the messages to the destination chain.
 func (r *Relayer) route(msgs []*message.Message) {
+	errChn := msgs[0].ErrChn
 	destChain, ok := r.relayedChains[msgs[0].Destination]
 	if !ok {
 		log.Error().Uint8("domainID", msgs[0].Destination).Msgf("No chain registered for destination domain")
+		utils.TrySendError(errChn, fmt.Errorf("no chain registered"))
 		return
 	}
 
@@ -69,6 +73,7 @@ func (r *Relayer) route(msgs []*message.Message) {
 		prop, err := destChain.ReceiveMessage(m)
 		if err != nil {
 			log.Err(err).Msgf("Failed receiving message %+v", m)
+			utils.TrySendError(errChn, err)
 			continue
 		}
 
@@ -79,13 +84,16 @@ func (r *Relayer) route(msgs []*message.Message) {
 		}
 	}
 	if len(props) == 0 {
+		utils.TrySendError(errChn, nil)
 		return
 	}
 
 	log.Debug().Msgf("Writing message")
 	err := destChain.Write(props)
 	if err != nil {
+		utils.TrySendError(errChn, err)
 		log.Err(err).Msgf("Failed writing message")
 		return
 	}
+	utils.TrySendError(errChn, nil)
 }
