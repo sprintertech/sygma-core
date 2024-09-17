@@ -110,7 +110,9 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_SuccessfulExec
 	hash, err := t.Transact(
 		&common.Address{},
 		byteData,
-		transactor.TransactOptions{},
+		transactor.TransactOptions{
+			ErrChn: errChn,
+		},
 	)
 	// Transaction executed
 	s.mockClient.EXPECT().TransactionReceipt(gomock.Any(), *hash).Return(&types.Receipt{
