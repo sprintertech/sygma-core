@@ -106,6 +106,7 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_SuccessfulExec
 		big.NewInt(15))
 
 	go t.Monitor(ctx, time.Millisecond*50, time.Minute, time.Millisecond)
+	errChn := make(chan error, 1)
 	hash, err := t.Transact(
 		&common.Address{},
 		byteData,
@@ -119,6 +120,8 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_SuccessfulExec
 
 	time.Sleep(time.Millisecond * 150)
 	cancel()
+	err = <-errChn
+	s.Nil(err)
 }
 
 func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_TxTimeout() {
@@ -140,17 +143,22 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_TxTimeout() {
 		big.NewInt(1000),
 		big.NewInt(15))
 
+	errChn := make(chan error, 1)
 	go t.Monitor(ctx, time.Millisecond*50, time.Millisecond, time.Millisecond)
 	hash, err := t.Transact(
 		&common.Address{},
 		byteData,
-		transactor.TransactOptions{},
+		transactor.TransactOptions{
+			ErrChn: errChn,
+		},
 	)
 	s.mockClient.EXPECT().TransactionReceipt(gomock.Any(), *hash).Return(nil, fmt.Errorf("not found"))
 	s.Nil(err)
 
 	time.Sleep(time.Millisecond * 150)
 	cancel()
+	err = <-errChn
+	s.NotNil(err)
 }
 
 func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_TransactionResent() {

@@ -21,6 +21,7 @@ type TransactOptions struct {
 	Nonce    *big.Int
 	ChainID  *big.Int
 	Priority uint8
+	ErrChn   chan error
 }
 
 // to save on data, we encode uin8 for transaction priority
