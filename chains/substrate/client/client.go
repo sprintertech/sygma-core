@@ -189,7 +189,7 @@ func (c *SubstrateClient) checkExtrinsicSuccess(extHash types.Hash, blockHash ty
 		}
 	}
 
-	if extrinsicCallCounter == 1 && extrinsicSuccessCounter > 1 {
+	if extrinsicCallCounter == 1 && extrinsicSuccessCounter >= 1 {
 		return nil
 	}
 
