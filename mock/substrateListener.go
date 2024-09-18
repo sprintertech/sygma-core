@@ -9,10 +9,10 @@
 package mock
 
 import (
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types/block"
 	reflect "reflect"
 
 	types "github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	block "github.com/centrifuge/go-substrate-rpc-client/v4/types/block"
 	gomock "go.uber.org/mock/gomock"
 )
 

@@ -174,7 +174,7 @@ func (c *SubstrateClient) checkExtrinsicSuccess(extHash types.Hash, blockHash ty
 	extrinsicCallCounter := 0
 	extrinsicSuccessCounter := 0
 	for _, event := range blockEvents {
-		if strings.ToLower(event.Name) == strings.ToLower(extrinsicMethod) {
+		if strings.EqualFold(event.Name, extrinsicMethod) {
 			extrinsicCallCounter++
 		}
 
