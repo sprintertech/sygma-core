@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"context"
+	"fmt"
 	"runtime"
 	"runtime/debug"
 
@@ -29,19 +30,22 @@ func NewSystemMetrics(meter metric.Meter, opts metric.MeasurementOption) (*Syste
 
 	gcDurationHistogram, err := meter.Float64Histogram(
 		"relayer.GcDurationSeconds",
-		metric.WithFloat64Callback(func(context context.Context, result metric.Float64Observer) error {
-			var gcStats debug.GCStats
-			debug.ReadGCStats(&gcStats)
-			if len(gcStats.Pause) > 0 {
-				recentPauseDuration := gcStats.Pause[0].Seconds()
-				result.Observe(recentPauseDuration, opts)
-			}
-		}),
 		metric.WithDescription("Duration of garbage collection cycles."),
 	)
 	if err != nil {
 		return nil, err
 	}
+	meter.RegisterCallback(func(ctx context.Context, result metric.Observer) error {
+		fmt.Println("CALLING CALLBACK")
+
+		var gcStats debug.GCStats
+		debug.ReadGCStats(&gcStats)
+		if len(gcStats.Pause) > 0 {
+			recentPauseDuration := gcStats.Pause[0].Seconds()
+			gcDurationHistogram.Record(context.Background(), recentPauseDuration, opts)
+		}
+		return nil
+	})
 
 	return &SystemMetrics{
 		goRoutinesGauge:     goRoutinesGauge,
