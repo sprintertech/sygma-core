@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sygmaprotocol/sygma-core/observability/metrics"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/metric"
@@ -58,6 +59,8 @@ func InitMetricProvider(ctx context.Context, agentURL string) (*sdkmetric.MeterP
 }
 
 type RelayerMetrics struct {
+	*metrics.SystemMetrics
+
 	meter metric.Meter
 	Opts  api.MeasurementOption
 
@@ -77,7 +80,7 @@ func NewRelayerMetrics(meter metric.Meter, attributes ...attribute.KeyValue) (*R
 	opts := api.WithAttributes(attributes...)
 
 	blockDeltaMap := make(map[uint8]*big.Int)
-	blockDeltaGauge, err := meter.Int64ObservableGauge(
+	blockDeltaGauge, _ := meter.Int64ObservableGauge(
 		"relayer.BlockDelta",
 		metric.WithInt64Callback(func(context context.Context, result metric.Int64Observer) error {
 			for domainID, delta := range blockDeltaMap {
@@ -90,7 +93,14 @@ func NewRelayerMetrics(meter metric.Meter, attributes ...attribute.KeyValue) (*R
 		}),
 		metric.WithDescription("Difference between chain head and current indexed block per domain"),
 	)
+
+	systemMetrics, err := metrics.NewSystemMetrics(meter, opts)
+	if err != nil {
+		return nil, err
+	}
+
 	return &RelayerMetrics{
+		SystemMetrics:    systemMetrics,
 		meter:            meter,
 		MessageEventTime: make(map[string]time.Time),
 		Opts:             opts,
