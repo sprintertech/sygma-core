@@ -58,7 +58,7 @@ func NewSystemMetrics(meter metric.Meter, opts metric.MeasurementOption) (*Syste
 		return nil, err
 	}
 	totalMemoryGauge, err := meter.Int64ObservableGauge(
-		"relayer.FreeMemoryBytes",
+		"relayer.TotalMemoryBytes",
 		metric.WithInt64Callback(func(context context.Context, result metric.Int64Observer) error {
 			v, err := mem.VirtualMemory()
 			if err != nil {
