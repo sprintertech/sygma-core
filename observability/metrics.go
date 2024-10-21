@@ -2,10 +2,7 @@ package observability
 
 import (
 	"context"
-	"math/big"
 	"net/url"
-	"sync"
-	"time"
 
 	"github.com/sygmaprotocol/sygma-core/observability/metrics"
 	"go.opentelemetry.io/otel/attribute"
@@ -60,58 +57,28 @@ func InitMetricProvider(ctx context.Context, agentURL string) (*sdkmetric.MeterP
 
 type RelayerMetrics struct {
 	*metrics.SystemMetrics
+	*metrics.NetworkMetrics
 
-	meter metric.Meter
-	Opts  api.MeasurementOption
-
-	DepositEventCount        metric.Int64Counter
-	MessageEventTime         map[string]time.Time
-	ExecutionErrorCount      metric.Int64Counter
-	ExecutionLatency         metric.Int64Histogram
-	ExecutionLatencyPerRoute metric.Int64Histogram
-	BlockDelta               metric.Int64ObservableGauge
-	BlockDeltaMap            map[uint8]*big.Int
-
-	lock sync.Mutex
+	Opts api.MeasurementOption
 }
 
 // NewRelayerMetrics initializes OpenTelemetry metrics
 func NewRelayerMetrics(ctx context.Context, meter metric.Meter, attributes ...attribute.KeyValue) (*RelayerMetrics, error) {
 	opts := api.WithAttributes(attributes...)
 
-	blockDeltaMap := make(map[uint8]*big.Int)
-	blockDeltaGauge, _ := meter.Int64ObservableGauge(
-		"relayer.BlockDelta",
-		metric.WithInt64Callback(func(context context.Context, result metric.Int64Observer) error {
-			for domainID, delta := range blockDeltaMap {
-				result.Observe(delta.Int64(),
-					opts,
-					metric.WithAttributes(attribute.Int64("domainID", int64(domainID))),
-				)
-			}
-			return nil
-		}),
-		metric.WithDescription("Difference between chain head and current indexed block per domain"),
-	)
-
 	systemMetrics, err := metrics.NewSystemMetrics(ctx, meter, opts)
 	if err != nil {
 		return nil, err
 	}
 
+	networkMetrics, err := metrics.NewNetworkMetrics(ctx, meter, opts)
+	if err != nil {
+		return nil, err
+	}
+
 	return &RelayerMetrics{
-		SystemMetrics:    systemMetrics,
-		meter:            meter,
-		MessageEventTime: make(map[string]time.Time),
-		Opts:             opts,
-		BlockDelta:       blockDeltaGauge,
-		BlockDeltaMap:    blockDeltaMap,
+		SystemMetrics:  systemMetrics,
+		NetworkMetrics: networkMetrics,
+		Opts:           opts,
 	}, err
-}
-
-func (t *RelayerMetrics) TrackBlockDelta(domainID uint8, head *big.Int, current *big.Int) {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
-	t.BlockDeltaMap[domainID] = new(big.Int).Sub(head, current)
 }
