@@ -2,7 +2,6 @@ package monitored
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"sync"
 	"time"
@@ -158,10 +157,13 @@ func (t *MonitoredTransactor) Monitor(
 				for oldHash, tx := range pendingTxCopy {
 					receipt, err := t.client.TransactionReceipt(context.Background(), oldHash)
 					if err == nil {
-						fmt.Println("TRACKING")
-						fmt.Println(receipt.EffectiveGasPrice)
-
-						t.gasTracker.TrackGasUsage(t.domainID, receipt.GasUsed, receipt.EffectiveGasPrice)
+						var gasPrice *big.Int
+						if len(tx.gasPrice) == 1 {
+							gasPrice = tx.gasPrice[0]
+						} else {
+							gasPrice = tx.gasPrice[1]
+						}
+						t.gasTracker.TrackGasUsage(t.domainID, receipt.GasUsed, gasPrice)
 
 						if receipt.Status == types.ReceiptStatusSuccessful {
 							t.log.Info().Uint64("nonce", tx.nonce).Msgf("Executed transaction %s with nonce %d", oldHash, tx.nonce)
