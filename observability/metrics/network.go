@@ -12,15 +12,16 @@ import (
 type NetworkMetrics struct {
 	opts metric.MeasurementOption
 
-	blockDeltaGauge metric.Int64ObservableGauge
-	blockDeltaMap   map[uint8]*big.Int
-
+	blockDeltaGauge     metric.Int64ObservableGauge
+	blockDeltaMap       map[uint8]*big.Int
 	processedBlockMap   map[uint8]*big.Int
 	processedBlockGauge metric.Int64ObservableGauge
+	chainHeadMap        map[uint8]*big.Int
+	chainHeadGauge      metric.Int64ObservableGauge
+	lock                sync.Mutex
 
-	chainHeadMap   map[uint8]*big.Int
-	chainHeadGauge metric.Int64ObservableGauge
-	lock           sync.Mutex
+	gasUsedHistogram  metric.Int64Histogram
+	gasPriceHistogram metric.Int64Histogram
 }
 
 // NewNetworkMetrics initializes metrics that provide insight into consensus and network activity
@@ -79,6 +80,22 @@ func NewNetworkMetrics(ctx context.Context, meter metric.Meter, opts metric.Meas
 		return nil, err
 	}
 
+	gasUsedHistogram, err := meter.Int64Histogram(
+		"relayer.GasUsed",
+		metric.WithDescription("Gas used per transaction."),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	gasPriceHistogram, err := meter.Int64Histogram(
+		"relayer.GasPrice",
+		metric.WithDescription("Gas price distribution per transaction."),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &NetworkMetrics{
 		opts:                opts,
 		blockDeltaMap:       blockDeltaMap,
@@ -87,6 +104,8 @@ func NewNetworkMetrics(ctx context.Context, meter metric.Meter, opts metric.Meas
 		chainHeadGauge:      chainHeadGauge,
 		processedBlockGauge: processedBlockGauge,
 		processedBlockMap:   processedBlockMap,
+		gasUsedHistogram:    gasUsedHistogram,
+		gasPriceHistogram:   gasPriceHistogram,
 	}, nil
 }
 
@@ -97,4 +116,15 @@ func (m *NetworkMetrics) TrackBlockDelta(domainID uint8, head *big.Int, current 
 	m.blockDeltaMap[domainID] = new(big.Int).Sub(head, current)
 	m.processedBlockMap[domainID] = new(big.Int).Set(current)
 	m.chainHeadMap[domainID] = new(big.Int).Set(head)
+}
+
+func (m *NetworkMetrics) TrackGasUsage(domainID uint8, gasUsed uint64, gasPrice *big.Int) {
+	m.gasPriceHistogram.Record(
+		context.Background(),
+		gasPrice.Int64(),
+		metric.WithAttributes(attribute.Int64("domainID", int64(domainID))))
+	m.gasUsedHistogram.Record(
+		context.Background(),
+		int64(gasUsed),
+		metric.WithAttributes(attribute.Int64("domainID", int64(domainID))))
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	"github.com/sygmaprotocol/sygma-core/chains/evm/client"
@@ -17,6 +18,10 @@ import (
 
 type GasPricer interface {
 	GasPrice(priority *uint8) ([]*big.Int, error)
+}
+
+type GasTracker interface {
+	TrackGasUsage(domainID uint8, gasUsed uint64, gasPrice *big.Int)
 }
 
 type RawTx struct {
@@ -31,8 +36,12 @@ type RawTx struct {
 }
 
 type MonitoredTransactor struct {
+	domainID uint8
+	log      zerolog.Logger
+
 	txFabric       transaction.TxFabric
 	gasPriceClient GasPricer
+	gasTracker     GasTracker
 	client         client.Client
 
 	maxGasPrice        *big.Int
@@ -49,15 +58,20 @@ type MonitoredTransactor struct {
 // Gas price is increased by increasePercentage param which
 // is a percentage value with which old gas price should be increased (e.g 15)
 func NewMonitoredTransactor(
+	domainID uint8,
 	txFabric transaction.TxFabric,
 	gasPriceClient GasPricer,
+	gasTracker GasTracker,
 	client client.Client,
 	maxGasPrice *big.Int,
 	increasePercentage *big.Int,
 ) *MonitoredTransactor {
 	return &MonitoredTransactor{
+		domainID:           domainID,
+		log:                log.With().Uint8("domainID", domainID).Logger(),
 		client:             client,
 		gasPriceClient:     gasPriceClient,
+		gasTracker:         gasTracker,
 		txFabric:           txFabric,
 		pendingTxns:        make(map[common.Hash]RawTx),
 		maxGasPrice:        maxGasPrice,
@@ -143,10 +157,12 @@ func (t *MonitoredTransactor) Monitor(
 				for oldHash, tx := range pendingTxCopy {
 					receipt, err := t.client.TransactionReceipt(context.Background(), oldHash)
 					if err == nil {
+						t.gasTracker.TrackGasUsage(t.domainID, receipt.GasUsed, receipt.EffectiveGasPrice)
+
 						if receipt.Status == types.ReceiptStatusSuccessful {
-							log.Info().Uint64("nonce", tx.nonce).Msgf("Executed transaction %s with nonce %d", oldHash, tx.nonce)
+							t.log.Info().Uint64("nonce", tx.nonce).Msgf("Executed transaction %s with nonce %d", oldHash, tx.nonce)
 						} else {
-							log.Error().Uint64("nonce", tx.nonce).Msgf("Transaction %s failed on chain", oldHash)
+							t.log.Error().Uint64("nonce", tx.nonce).Msgf("Transaction %s failed on chain", oldHash)
 						}
 
 						delete(t.pendingTxns, oldHash)
@@ -154,7 +170,7 @@ func (t *MonitoredTransactor) Monitor(
 					}
 
 					if time.Since(tx.creationTime) > txTimeout {
-						log.Error().Uint64("nonce", tx.nonce).Msgf("Transaction %s has timed out", oldHash)
+						t.log.Error().Uint64("nonce", tx.nonce).Msgf("Transaction %s has timed out", oldHash)
 						delete(t.pendingTxns, oldHash)
 						continue
 					}
@@ -164,7 +180,7 @@ func (t *MonitoredTransactor) Monitor(
 
 					hash, err := t.resendTransaction(&tx)
 					if err != nil {
-						log.Warn().Uint64("nonce", tx.nonce).Err(err).Msgf("Failed resending transaction %s", hash)
+						t.log.Warn().Uint64("nonce", tx.nonce).Err(err).Msgf("Failed resending transaction %s", hash)
 						continue
 					}
 
@@ -188,7 +204,7 @@ func (t *MonitoredTransactor) resendTransaction(tx *RawTx) (common.Hash, error) 
 		return common.Hash{}, err
 	}
 
-	log.Debug().Uint64("nonce", tx.nonce).Msgf("Resent transaction with hash %s", hash)
+	t.log.Debug().Uint64("nonce", tx.nonce).Msgf("Resent transaction with hash %s", hash)
 
 	return hash, nil
 }
