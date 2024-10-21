@@ -13,6 +13,10 @@ import (
 	"go.opentelemetry.io/otel/metric"
 )
 
+const (
+	GC_STATS_UPDATE_PERIOD = time.Second * 10
+)
+
 type SystemMetrics struct {
 	opts metric.MeasurementOption
 
@@ -28,7 +32,7 @@ type SystemMetrics struct {
 }
 
 // NewSystemMetrics initializes system performance and resource utilization metrics
-func NewSystemMetrics(meter metric.Meter, opts metric.MeasurementOption) (*SystemMetrics, error) {
+func NewSystemMetrics(ctx context.Context, meter metric.Meter, opts metric.MeasurementOption) (*SystemMetrics, error) {
 	goRoutinesGauge, err := meter.Int64ObservableGauge(
 		"relayer.GoRoutines",
 		metric.WithInt64Callback(func(context context.Context, result metric.Int64Observer) error {
@@ -177,19 +181,35 @@ func NewSystemMetrics(meter metric.Meter, opts metric.MeasurementOption) (*Syste
 		networkIOReceivedGauge: networkIOReceivedGauge,
 		networkIOSentGauge:     networkIOSentGauge,
 	}
-	go m.update()
+
+	go m.updateGCStats(ctx)
 	return m, err
 }
 
-func (m *SystemMetrics) update() {
+func (m *SystemMetrics) updateGCStats(ctx context.Context) {
+	ticker := time.NewTicker(GC_STATS_UPDATE_PERIOD)
+	var previousPauseDuration float64
 	for {
-		var gcStats debug.GCStats
-		debug.ReadGCStats(&gcStats)
-		if len(gcStats.Pause) > 0 {
-			recentPauseDuration := gcStats.Pause[0].Seconds()
-			m.gcDurationHistogram.Record(context.Background(), recentPauseDuration, m.opts)
-		}
+		select {
+		case <-ticker.C:
+			{
+				var gcStats debug.GCStats
+				debug.ReadGCStats(&gcStats)
+				if len(gcStats.Pause) == 0 {
+					continue
+				}
 
-		time.Sleep(time.Second * 10)
+				recentPauseDuration := gcStats.Pause[0].Seconds()
+				if recentPauseDuration == previousPauseDuration {
+					continue
+				}
+
+				m.gcDurationHistogram.Record(context.Background(), recentPauseDuration, m.opts)
+				previousPauseDuration = recentPauseDuration
+			}
+		case <-ctx.Done():
+			return
+
+		}
 	}
 }

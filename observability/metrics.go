@@ -76,7 +76,7 @@ type RelayerMetrics struct {
 }
 
 // NewRelayerMetrics initializes OpenTelemetry metrics
-func NewRelayerMetrics(meter metric.Meter, attributes ...attribute.KeyValue) (*RelayerMetrics, error) {
+func NewRelayerMetrics(ctx context.Context, meter metric.Meter, attributes ...attribute.KeyValue) (*RelayerMetrics, error) {
 	opts := api.WithAttributes(attributes...)
 
 	blockDeltaMap := make(map[uint8]*big.Int)
@@ -94,7 +94,7 @@ func NewRelayerMetrics(meter metric.Meter, attributes ...attribute.KeyValue) (*R
 		metric.WithDescription("Difference between chain head and current indexed block per domain"),
 	)
 
-	systemMetrics, err := metrics.NewSystemMetrics(meter, opts)
+	systemMetrics, err := metrics.NewSystemMetrics(ctx, meter, opts)
 	if err != nil {
 		return nil, err
 	}
