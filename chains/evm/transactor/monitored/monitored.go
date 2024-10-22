@@ -35,6 +35,14 @@ type RawTx struct {
 	creationTime time.Time
 }
 
+func (tx *RawTx) GasPrice() *big.Int {
+	if len(tx.gasPrice) == 1 {
+		return tx.gasPrice[0]
+	} else {
+		return tx.gasPrice[1]
+	}
+}
+
 type MonitoredTransactor struct {
 	domainID uint8
 	log      zerolog.Logger
@@ -157,13 +165,7 @@ func (t *MonitoredTransactor) Monitor(
 				for oldHash, tx := range pendingTxCopy {
 					receipt, err := t.client.TransactionReceipt(context.Background(), oldHash)
 					if err == nil {
-						var gasPrice *big.Int
-						if len(tx.gasPrice) == 1 {
-							gasPrice = tx.gasPrice[0]
-						} else {
-							gasPrice = tx.gasPrice[1]
-						}
-						t.gasTracker.TrackGasUsage(t.domainID, receipt.GasUsed, gasPrice)
+						t.gasTracker.TrackGasUsage(t.domainID, receipt.GasUsed, tx.GasPrice())
 
 						if receipt.Status == types.ReceiptStatusSuccessful {
 							t.log.Info().Uint64("nonce", tx.nonce).Msgf("Executed transaction %s with nonce %d", oldHash, tx.nonce)
