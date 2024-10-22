@@ -35,12 +35,15 @@ type RawTx struct {
 	creationTime time.Time
 }
 
+// GasPrice returns transaction gas price in gwei
 func (tx *RawTx) GasPrice() *big.Int {
+	var gasPrice *big.Int
 	if len(tx.gasPrice) == 1 {
-		return tx.gasPrice[0]
+		gasPrice = tx.gasPrice[0]
 	} else {
-		return tx.gasPrice[1]
+		gasPrice = tx.gasPrice[1]
 	}
+	return new(big.Int).Div(gasPrice, big.NewInt(1e9))
 }
 
 type MonitoredTransactor struct {
