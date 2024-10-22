@@ -37,7 +37,7 @@ genmocks:
 	mockgen -destination=./mock/gas.go -source=./chains/evm/transactor/gas/gas-pricer.go -package mock
 	mockgen -destination=./mock/relayer.go -source=./relayer/relayer.go -package mock
 	mockgen -source=chains/evm/transactor/transact.go -destination=./mock/transact.go -package mock
-	mockgen -source=chains/evm/transactor/signAndSend/signAndSend.go -destination=./mock/signAndSend.go -package mock
+	mockgen -source=chains/evm/transactor/monitored/monitored.go -destination=./mock/monitored.go -package mock
 	mockgen -source=./store/store.go -destination=./mock/store.go -package mock
 	mockgen -source=./relayer/message/handler.go -destination=./mock/message.go -package mock
 	mockgen -source=./chains/evm/listener/listener.go -destination=./mock/evmListener.go -package mock

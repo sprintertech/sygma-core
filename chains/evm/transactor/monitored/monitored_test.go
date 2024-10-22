@@ -21,6 +21,7 @@ type TransactorTestSuite struct {
 	suite.Suite
 	gomockController *gomock.Controller
 	mockClient       *mock.MockClient
+	mockGasTracker   *mock.MockGasTracker
 	mockTransactor   *mock.MockTransactor
 	mockGasPricer    *mock.MockGasPricer
 }
@@ -34,6 +35,8 @@ func (s *TransactorTestSuite) SetupTest() {
 	s.mockClient = mock.NewMockClient(s.gomockController)
 	s.mockTransactor = mock.NewMockTransactor(s.gomockController)
 	s.mockGasPricer = mock.NewMockGasPricer(s.gomockController)
+	s.mockGasTracker = mock.NewMockGasTracker(s.gomockController)
+	s.mockGasTracker.EXPECT().TrackGasUsage(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 }
 
 func (s *TransactorTestSuite) TestTransactor_SignAndSend_Success() {
@@ -47,8 +50,10 @@ func (s *TransactorTestSuite) TestTransactor_SignAndSend_Success() {
 	s.mockClient.EXPECT().UnlockNonce()
 
 	t := monitored.NewMonitoredTransactor(
+		1,
 		transaction.NewTransaction,
 		s.mockGasPricer,
+		s.mockGasTracker,
 		s.mockClient,
 		big.NewInt(1000),
 		big.NewInt(15))
@@ -72,8 +77,10 @@ func (s *TransactorTestSuite) TestTransactor_SignAndSend_Fail() {
 	s.mockClient.EXPECT().UnlockNonce()
 
 	t := monitored.NewMonitoredTransactor(
+		1,
 		transaction.NewTransaction,
 		s.mockGasPricer,
+		s.mockGasTracker,
 		s.mockClient,
 		big.NewInt(1000),
 		big.NewInt(15))
@@ -99,8 +106,10 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_SuccessfulExec
 
 	ctx, cancel := context.WithCancel(context.Background())
 	t := monitored.NewMonitoredTransactor(
+		1,
 		transaction.NewTransaction,
 		s.mockGasPricer,
+		s.mockGasTracker,
 		s.mockClient,
 		big.NewInt(1000),
 		big.NewInt(15))
@@ -134,8 +143,10 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_TxTimeout() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	t := monitored.NewMonitoredTransactor(
+		1,
 		transaction.NewTransaction,
 		s.mockGasPricer,
+		s.mockGasTracker,
 		s.mockClient,
 		big.NewInt(1000),
 		big.NewInt(15))
@@ -169,8 +180,10 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_TransactionRes
 
 	ctx, cancel := context.WithCancel(context.Background())
 	t := monitored.NewMonitoredTransactor(
+		1,
 		transaction.NewTransaction,
 		s.mockGasPricer,
+		s.mockGasTracker,
 		s.mockClient,
 		big.NewInt(1000),
 		big.NewInt(15))
@@ -208,8 +221,10 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_MaxGasPriceRea
 
 	ctx, cancel := context.WithCancel(context.Background())
 	t := monitored.NewMonitoredTransactor(
+		1,
 		transaction.NewTransaction,
 		s.mockGasPricer,
+		s.mockGasTracker,
 		s.mockClient,
 		big.NewInt(10),
 		big.NewInt(15))
@@ -233,8 +248,10 @@ func (s *TransactorTestSuite) TestTransactor_MonitoredTransaction_MaxGasPriceRea
 
 func (s *TransactorTestSuite) TestTransactor_IncreaseGas_15PercentIncrease() {
 	t := monitored.NewMonitoredTransactor(
+		1,
 		transaction.NewTransaction,
 		s.mockGasPricer,
+		s.mockGasTracker,
 		s.mockClient,
 		big.NewInt(150),
 		big.NewInt(15))
@@ -246,8 +263,10 @@ func (s *TransactorTestSuite) TestTransactor_IncreaseGas_15PercentIncrease() {
 
 func (s *TransactorTestSuite) TestTransactor_IncreaseGas_MaxGasReached() {
 	t := monitored.NewMonitoredTransactor(
+		1,
 		transaction.NewTransaction,
 		s.mockGasPricer,
+		s.mockGasTracker,
 		s.mockClient,
 		big.NewInt(15),
 		big.NewInt(15))
