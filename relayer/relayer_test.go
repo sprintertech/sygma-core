@@ -29,7 +29,7 @@ func (s *RouteTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
 	s.mockRelayedChain = mock.NewMockRelayedChain(gomockController)
 	s.mockMessageTracker = mock.NewMockMessageTracker(gomockController)
-	s.mockMessageTracker.EXPECT().TrackMessage(gomock.Any(), gomock.Any()).AnyTimes()
+	s.mockMessageTracker.EXPECT().TrackMessages(gomock.Any(), gomock.Any()).AnyTimes()
 }
 func (s *RouteTestSuite) TearDownTest() {}
 

@@ -118,14 +118,14 @@ func (m *MockMessageTracker) EXPECT() *MockMessageTrackerMockRecorder {
 	return m.recorder
 }
 
-// TrackMessage mocks base method.
-func (m *MockMessageTracker) TrackMessage(msgs []*message.Message, status message.MessageStatus) {
+// TrackMessages mocks base method.
+func (m *MockMessageTracker) TrackMessages(msgs []*message.Message, status message.MessageStatus) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "TrackMessage", msgs, status)
+	m.ctrl.Call(m, "TrackMessages", msgs, status)
 }
 
-// TrackMessage indicates an expected call of TrackMessage.
-func (mr *MockMessageTrackerMockRecorder) TrackMessage(msgs, status any) *gomock.Call {
+// TrackMessages indicates an expected call of TrackMessages.
+func (mr *MockMessageTrackerMockRecorder) TrackMessages(msgs, status any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TrackMessage", reflect.TypeOf((*MockMessageTracker)(nil).TrackMessage), msgs, status)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TrackMessages", reflect.TypeOf((*MockMessageTracker)(nil).TrackMessages), msgs, status)
 }
