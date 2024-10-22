@@ -94,3 +94,38 @@ func (mr *MockRelayedChainMockRecorder) Write(proposals any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Write", reflect.TypeOf((*MockRelayedChain)(nil).Write), proposals)
 }
+
+// MockMessageTracker is a mock of MessageTracker interface.
+type MockMessageTracker struct {
+	ctrl     *gomock.Controller
+	recorder *MockMessageTrackerMockRecorder
+}
+
+// MockMessageTrackerMockRecorder is the mock recorder for MockMessageTracker.
+type MockMessageTrackerMockRecorder struct {
+	mock *MockMessageTracker
+}
+
+// NewMockMessageTracker creates a new mock instance.
+func NewMockMessageTracker(ctrl *gomock.Controller) *MockMessageTracker {
+	mock := &MockMessageTracker{ctrl: ctrl}
+	mock.recorder = &MockMessageTrackerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockMessageTracker) EXPECT() *MockMessageTrackerMockRecorder {
+	return m.recorder
+}
+
+// TrackMessage mocks base method.
+func (m *MockMessageTracker) TrackMessage(msgs []*message.Message, status message.MessageStatus) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "TrackMessage", msgs, status)
+}
+
+// TrackMessage indicates an expected call of TrackMessage.
+func (mr *MockMessageTrackerMockRecorder) TrackMessage(msgs, status any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TrackMessage", reflect.TypeOf((*MockMessageTracker)(nil).TrackMessage), msgs, status)
+}

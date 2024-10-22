@@ -23,12 +23,20 @@ type RelayedChain interface {
 	DomainID() uint8
 }
 
-func NewRelayer(chains map[uint8]RelayedChain) *Relayer {
-	return &Relayer{relayedChains: chains}
+type MessageTracker interface {
+	TrackMessage(msgs []*message.Message, status message.MessageStatus)
+}
+
+func NewRelayer(chains map[uint8]RelayedChain, messageTracker MessageTracker) *Relayer {
+	return &Relayer{
+		relayedChains:  chains,
+		messageTracker: messageTracker,
+	}
 }
 
 type Relayer struct {
-	relayedChains map[uint8]RelayedChain
+	relayedChains  map[uint8]RelayedChain
+	messageTracker MessageTracker
 }
 
 // Start function starts polling events for each chain and listens to cross-chain messages.
@@ -55,6 +63,7 @@ func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message) {
 
 // Route function routes the messages to the destination chain.
 func (r *Relayer) route(msgs []*message.Message) {
+	r.messageTracker.TrackMessage(msgs, message.PendingMessage)
 	destChain, ok := r.relayedChains[msgs[0].Destination]
 	if !ok {
 		log.Error().Uint8("domainID", msgs[0].Destination).Msgf("No chain registered for destination domain")
@@ -69,6 +78,7 @@ func (r *Relayer) route(msgs []*message.Message) {
 		prop, err := destChain.ReceiveMessage(m)
 		if err != nil {
 			log.Err(err).Msgf("Failed receiving message %+v", m)
+			r.messageTracker.TrackMessage([]*message.Message{m}, message.FailedMessage)
 			continue
 		}
 
@@ -85,7 +95,9 @@ func (r *Relayer) route(msgs []*message.Message) {
 	log.Debug().Msgf("Writing message")
 	err := destChain.Write(props)
 	if err != nil {
+		r.messageTracker.TrackMessage(msgs, message.FailedMessage)
 		log.Err(err).Msgf("Failed writing message")
 		return
 	}
+	r.messageTracker.TrackMessage(msgs, message.SuccessfulMessage)
 }

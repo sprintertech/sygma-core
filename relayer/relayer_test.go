@@ -15,7 +15,8 @@ import (
 
 type RouteTestSuite struct {
 	suite.Suite
-	mockRelayedChain *mock.MockRelayedChain
+	mockRelayedChain   *mock.MockRelayedChain
+	mockMessageTracker *mock.MockMessageTracker
 }
 
 func TestRunRouteTestSuite(t *testing.T) {
@@ -27,6 +28,8 @@ func (s *RouteTestSuite) TearDownSuite() {}
 func (s *RouteTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
 	s.mockRelayedChain = mock.NewMockRelayedChain(gomockController)
+	s.mockMessageTracker = mock.NewMockMessageTracker(gomockController)
+	s.mockMessageTracker.EXPECT().TrackMessage(gomock.Any(), gomock.Any()).AnyTimes()
 }
 func (s *RouteTestSuite) TearDownTest() {}
 
@@ -44,6 +47,7 @@ func (s *RouteTestSuite) TestStartListensOnChannel() {
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
+		s.mockMessageTracker,
 	)
 
 	msgChan := make(chan []*message.Message, 1)
@@ -61,6 +65,7 @@ func (s *RouteTestSuite) TestReceiveMessageFails() {
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
+		s.mockMessageTracker,
 	)
 
 	relayer.route([]*message.Message{
@@ -75,6 +80,7 @@ func (s *RouteTestSuite) TestAvoidWriteWithoutProposals() {
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
+		s.mockMessageTracker,
 	)
 
 	relayer.route([]*message.Message{
@@ -93,6 +99,7 @@ func (s *RouteTestSuite) TestWriteFails() {
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
+		s.mockMessageTracker,
 	)
 
 	relayer.route([]*message.Message{
@@ -111,6 +118,7 @@ func (s *RouteTestSuite) TestWritesToChain() {
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
+		s.mockMessageTracker,
 	)
 
 	relayer.route([]*message.Message{
@@ -126,6 +134,7 @@ func (s *RouteTestSuite) Test_Route_ChainDoesNotExist() {
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
+		s.mockMessageTracker,
 	)
 
 	relayer.route([]*message.Message{

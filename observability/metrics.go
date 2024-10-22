@@ -78,6 +78,9 @@ func initSecondView() sdkmetric.View {
 					1.0,      // 1 s
 					5.0,      // 5 s
 					10.0,     // 10 s
+					100.0,    // 100s
+					1000.0,   // 1000s
+					10000.0,  // 10000s
 				},
 				NoMinMax: false,
 			},
@@ -113,6 +116,7 @@ func initGasView() sdkmetric.View {
 type RelayerMetrics struct {
 	*metrics.SystemMetrics
 	*metrics.NetworkMetrics
+	*metrics.MessageMetrics
 
 	Opts api.MeasurementOption
 }
@@ -131,9 +135,15 @@ func NewRelayerMetrics(ctx context.Context, meter metric.Meter, attributes ...at
 		return nil, err
 	}
 
+	messageMetrics, err := metrics.NewMessageMetrics(ctx, meter, opts)
+	if err != nil {
+		return nil, err
+	}
+
 	return &RelayerMetrics{
 		SystemMetrics:  systemMetrics,
 		NetworkMetrics: networkMetrics,
+		MessageMetrics: messageMetrics,
 		Opts:           opts,
 	}, err
 }
