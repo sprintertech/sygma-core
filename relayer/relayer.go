@@ -24,7 +24,7 @@ type RelayedChain interface {
 }
 
 type MessageTracker interface {
-	TrackMessage(msgs []*message.Message, status message.MessageStatus)
+	TrackMessages(msgs []*message.Message, status message.MessageStatus)
 }
 
 func NewRelayer(chains map[uint8]RelayedChain, messageTracker MessageTracker) *Relayer {
@@ -63,7 +63,7 @@ func (r *Relayer) Start(ctx context.Context, msgChan chan []*message.Message) {
 
 // Route function routes the messages to the destination chain.
 func (r *Relayer) route(msgs []*message.Message) {
-	r.messageTracker.TrackMessage(msgs, message.PendingMessage)
+	r.messageTracker.TrackMessages(msgs, message.PendingMessage)
 	destChain, ok := r.relayedChains[msgs[0].Destination]
 	if !ok {
 		log.Error().Uint8("domainID", msgs[0].Destination).Msgf("No chain registered for destination domain")
@@ -78,7 +78,7 @@ func (r *Relayer) route(msgs []*message.Message) {
 		prop, err := destChain.ReceiveMessage(m)
 		if err != nil {
 			log.Err(err).Msgf("Failed receiving message %+v", m)
-			r.messageTracker.TrackMessage([]*message.Message{m}, message.FailedMessage)
+			r.messageTracker.TrackMessages([]*message.Message{m}, message.FailedMessage)
 			continue
 		}
 
@@ -95,9 +95,9 @@ func (r *Relayer) route(msgs []*message.Message) {
 	log.Debug().Msgf("Writing message")
 	err := destChain.Write(props)
 	if err != nil {
-		r.messageTracker.TrackMessage(msgs, message.FailedMessage)
+		r.messageTracker.TrackMessages(msgs, message.FailedMessage)
 		log.Err(err).Msgf("Failed writing message")
 		return
 	}
-	r.messageTracker.TrackMessage(msgs, message.SuccessfulMessage)
+	r.messageTracker.TrackMessages(msgs, message.SuccessfulMessage)
 }
