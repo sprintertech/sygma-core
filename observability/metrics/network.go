@@ -83,6 +83,7 @@ func NewNetworkMetrics(ctx context.Context, meter metric.Meter, opts metric.Meas
 	gasUsedHistogram, err := meter.Int64Histogram(
 		"relayer.GasUsed",
 		metric.WithDescription("Gas used per transaction."),
+		metric.WithUnit("gas"),
 	)
 	if err != nil {
 		return nil, err
@@ -91,6 +92,7 @@ func NewNetworkMetrics(ctx context.Context, meter metric.Meter, opts metric.Meas
 	gasPriceHistogram, err := meter.Int64Histogram(
 		"relayer.GasPrice",
 		metric.WithDescription("Gas price distribution per transaction."),
+		metric.WithUnit("gas"),
 	)
 	if err != nil {
 		return nil, err
