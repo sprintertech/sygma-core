@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/otel/metric"
 )
 
-type NetworkMetrics struct {
+type ChainMetrics struct {
 	opts metric.MeasurementOption
 
 	blockDeltaGauge     metric.Int64ObservableGauge
@@ -24,8 +24,8 @@ type NetworkMetrics struct {
 	gasPriceHistogram metric.Int64Histogram
 }
 
-// NewNetworkMetrics initializes metrics that provide insight into consensus and network activity
-func NewNetworkMetrics(ctx context.Context, meter metric.Meter, opts metric.MeasurementOption) (*NetworkMetrics, error) {
+// NewChainMetrics initializes metrics that provide insight into chain processing and activity
+func NewChainMetrics(ctx context.Context, meter metric.Meter, opts metric.MeasurementOption) (*ChainMetrics, error) {
 	blockDeltaMap := make(map[uint8]*big.Int)
 	blockDeltaGauge, err := meter.Int64ObservableGauge(
 		"relayer.BlockDelta",
@@ -97,7 +97,7 @@ func NewNetworkMetrics(ctx context.Context, meter metric.Meter, opts metric.Meas
 		return nil, err
 	}
 
-	return &NetworkMetrics{
+	return &ChainMetrics{
 		opts:                opts,
 		blockDeltaMap:       blockDeltaMap,
 		chainHeadMap:        chainHeadMap,
@@ -110,7 +110,7 @@ func NewNetworkMetrics(ctx context.Context, meter metric.Meter, opts metric.Meas
 	}, nil
 }
 
-func (m *NetworkMetrics) TrackBlockDelta(domainID uint8, head *big.Int, current *big.Int) {
+func (m *ChainMetrics) TrackBlockDelta(domainID uint8, head *big.Int, current *big.Int) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -119,7 +119,7 @@ func (m *NetworkMetrics) TrackBlockDelta(domainID uint8, head *big.Int, current 
 	m.chainHeadMap[domainID] = new(big.Int).Set(head)
 }
 
-func (m *NetworkMetrics) TrackGasUsage(domainID uint8, gasUsed uint64, gasPrice *big.Int) {
+func (m *ChainMetrics) TrackGasUsage(domainID uint8, gasUsed uint64, gasPrice *big.Int) {
 	m.gasPriceHistogram.Record(
 		context.Background(),
 		gasPrice.Int64(),

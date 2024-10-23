@@ -112,7 +112,7 @@ func initGasView() sdkmetric.View {
 
 type RelayerMetrics struct {
 	*metrics.SystemMetrics
-	*metrics.NetworkMetrics
+	*metrics.ChainMetrics
 
 	Opts api.MeasurementOption
 }
@@ -126,14 +126,14 @@ func NewRelayerMetrics(ctx context.Context, meter metric.Meter, attributes ...at
 		return nil, err
 	}
 
-	networkMetrics, err := metrics.NewNetworkMetrics(ctx, meter, opts)
+	chainMetrics, err := metrics.NewChainMetrics(ctx, meter, opts)
 	if err != nil {
 		return nil, err
 	}
 
 	return &RelayerMetrics{
-		SystemMetrics:  systemMetrics,
-		NetworkMetrics: networkMetrics,
-		Opts:           opts,
+		SystemMetrics: systemMetrics,
+		ChainMetrics:  chainMetrics,
+		Opts:          opts,
 	}, err
 }
