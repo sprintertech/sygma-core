@@ -36,6 +36,8 @@ type RawTx struct {
 }
 
 // GasPrice returns transaction gas price in gwei
+//
+// It returns base fee for both London and legacy transactions.
 func (tx *RawTx) GasPrice() *big.Int {
 	var gasPrice *big.Int
 	if len(tx.gasPrice) == 1 {
