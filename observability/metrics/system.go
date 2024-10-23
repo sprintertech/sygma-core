@@ -164,6 +164,7 @@ func NewSystemMetrics(ctx context.Context, meter metric.Meter, opts metric.Measu
 	gcDurationHistogram, err := meter.Float64Histogram(
 		"relayer.GcDurationSeconds",
 		metric.WithDescription("Duration of garbage collection cycles."),
+		metric.WithUnit("s"),
 	)
 	if err != nil {
 		return nil, err

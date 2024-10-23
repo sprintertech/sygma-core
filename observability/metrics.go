@@ -2,10 +2,7 @@ package observability
 
 import (
 	"context"
-	"math/big"
 	"net/url"
-	"sync"
-	"time"
 
 	"github.com/sygmaprotocol/sygma-core/observability/metrics"
 	"go.opentelemetry.io/otel/attribute"
@@ -13,23 +10,12 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	api "go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/metric/aggregation"
 	sdkresource "go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 )
 
-func initResource() *sdkresource.Resource {
-	res, _ := sdkresource.New(context.Background(),
-		sdkresource.WithProcess(),
-		sdkresource.WithTelemetrySDK(),
-		sdkresource.WithHost(),
-		sdkresource.WithAttributes(
-			semconv.ServiceName("relayer"),
-		),
-	)
-	return res
-}
-
-func InitMetricProvider(ctx context.Context, agentURL string) (*sdkmetric.MeterProvider, error) {
+func InitMetricProvider(ctx context.Context, agentURL string, opts ...sdkmetric.Option) (*sdkmetric.MeterProvider, error) {
 	collectorURL, err := url.Parse(agentURL)
 	if err != nil {
 		return nil, err
@@ -50,68 +36,104 @@ func InitMetricProvider(ctx context.Context, agentURL string) (*sdkmetric.MeterP
 
 	httpMetricReader := sdkmetric.NewPeriodicReader(metricHTTPExporter)
 
+	opts = append(opts, sdkmetric.WithReader(httpMetricReader))
+	opts = append(opts, sdkmetric.WithResource(initResource()))
+	opts = append(opts, sdkmetric.WithView(initSecondView()))
+	opts = append(opts, sdkmetric.WithView(initGasView()))
 	meterProvider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithReader(httpMetricReader),
-		sdkmetric.WithResource(initResource()),
+		opts...,
 	)
-
 	return meterProvider, nil
+}
+
+func initResource() *sdkresource.Resource {
+	res, _ := sdkresource.New(context.Background(),
+		sdkresource.WithProcess(),
+		sdkresource.WithTelemetrySDK(),
+		sdkresource.WithHost(),
+		sdkresource.WithAttributes(
+			semconv.ServiceName("relayer"),
+		),
+	)
+	return res
+}
+
+func initSecondView() sdkmetric.View {
+	return sdkmetric.NewView(
+		sdkmetric.Instrument{
+			Unit: "s",
+		},
+		sdkmetric.Stream{
+			Aggregation: aggregation.ExplicitBucketHistogram{
+				Boundaries: []float64{
+					0.000001, // 1 µs
+					0.00001,  // 10 µs
+					0.0001,   // 100 µs
+					0.001,    // 1 ms
+					0.005,    // 5 ms
+					0.01,     // 10 ms
+					0.05,     // 50 ms
+					0.1,      // 100 ms
+					0.5,      // 500 ms
+					1.0,      // 1 s
+					5.0,      // 5 s
+					10.0,     // 10 s
+				},
+				NoMinMax: false,
+			},
+		},
+	)
+}
+
+func initGasView() sdkmetric.View {
+	return sdkmetric.NewView(
+		sdkmetric.Instrument{
+			Unit: "gas",
+		},
+		sdkmetric.Stream{
+			Aggregation: aggregation.ExplicitBucketHistogram{
+				Boundaries: []float64{
+					10000,
+					20000,
+					50000,
+					100000,
+					500000,
+					1000000,
+					5000000,
+					10000000,
+					15000000,
+					30000000,
+				},
+				NoMinMax: false,
+			},
+		},
+	)
 }
 
 type RelayerMetrics struct {
 	*metrics.SystemMetrics
+	*metrics.ChainMetrics
 
-	meter metric.Meter
-	Opts  api.MeasurementOption
-
-	DepositEventCount        metric.Int64Counter
-	MessageEventTime         map[string]time.Time
-	ExecutionErrorCount      metric.Int64Counter
-	ExecutionLatency         metric.Int64Histogram
-	ExecutionLatencyPerRoute metric.Int64Histogram
-	BlockDelta               metric.Int64ObservableGauge
-	BlockDeltaMap            map[uint8]*big.Int
-
-	lock sync.Mutex
+	Opts api.MeasurementOption
 }
 
 // NewRelayerMetrics initializes OpenTelemetry metrics
 func NewRelayerMetrics(ctx context.Context, meter metric.Meter, attributes ...attribute.KeyValue) (*RelayerMetrics, error) {
 	opts := api.WithAttributes(attributes...)
 
-	blockDeltaMap := make(map[uint8]*big.Int)
-	blockDeltaGauge, _ := meter.Int64ObservableGauge(
-		"relayer.BlockDelta",
-		metric.WithInt64Callback(func(context context.Context, result metric.Int64Observer) error {
-			for domainID, delta := range blockDeltaMap {
-				result.Observe(delta.Int64(),
-					opts,
-					metric.WithAttributes(attribute.Int64("domainID", int64(domainID))),
-				)
-			}
-			return nil
-		}),
-		metric.WithDescription("Difference between chain head and current indexed block per domain"),
-	)
-
 	systemMetrics, err := metrics.NewSystemMetrics(ctx, meter, opts)
 	if err != nil {
 		return nil, err
 	}
 
+	chainMetrics, err := metrics.NewChainMetrics(ctx, meter, opts)
+	if err != nil {
+		return nil, err
+	}
+
 	return &RelayerMetrics{
-		SystemMetrics:    systemMetrics,
-		meter:            meter,
-		MessageEventTime: make(map[string]time.Time),
-		Opts:             opts,
-		BlockDelta:       blockDeltaGauge,
-		BlockDeltaMap:    blockDeltaMap,
+		SystemMetrics: systemMetrics,
+		ChainMetrics:  chainMetrics,
+		Opts:          opts,
 	}, err
-}
-
-func (t *RelayerMetrics) TrackBlockDelta(domainID uint8, head *big.Int, current *big.Int) {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
-	t.BlockDeltaMap[domainID] = new(big.Int).Sub(head, current)
 }
