@@ -4,13 +4,17 @@
 package connection
 
 import (
+	"bytes"
 	"math/big"
 	"sync"
+	"time"
 
 	"github.com/centrifuge/go-substrate-rpc-client/v4/client"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/registry"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/parser"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/retriever"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/state"
+	"github.com/vedhavyas/go-subkey/scale"
 
 	"github.com/centrifuge/go-substrate-rpc-client/v4/rpc"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/rpc/chain"
@@ -85,7 +89,46 @@ func (c *Connection) GetBlockEvents(hash types.Hash) ([]*parser.Event, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	timestamp, err := c.GetBlockTimestamp(hash)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, e := range evts {
+		e.Fields = append(e.Fields, &registry.DecodedField{
+			Value: timestamp,
+			Name:  "block_timestamp",
+		})
+	}
 	return evts, nil
+}
+
+func (c *Connection) GetBlockTimestamp(hash types.Hash) (time.Time, error) {
+	callIndex, err := c.meta.FindCallIndex("Timestamp.set")
+	if err != nil {
+		return time.Now(), err
+	}
+
+	block, err := c.GetBlock(hash)
+	if err != nil {
+		return time.Now(), err
+	}
+
+	timestamp := new(big.Int)
+	for _, extrinsic := range block.Block.Extrinsics {
+		if extrinsic.Method.CallIndex != callIndex {
+			continue
+		}
+		timeDecoder := scale.NewDecoder(bytes.NewReader(extrinsic.Method.Args))
+		timestamp, err = timeDecoder.DecodeUintCompact()
+		if err != nil {
+			return time.Now(), err
+		}
+		break
+	}
+	msec := timestamp.Int64()
+	return time.Unix(msec/1e3, (msec%1e3)*1e6), nil
 }
 
 func (c *Connection) FetchEvents(startBlock, endBlock *big.Int) ([]*parser.Event, error) {
