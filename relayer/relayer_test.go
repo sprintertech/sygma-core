@@ -43,7 +43,7 @@ func (s *RouteTestSuite) TestStartListensOnChannel() {
 		return 1
 	})
 	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(nil, fmt.Errorf("error"))
-	chains := make(map[uint8]RelayedChain)
+	chains := make(map[uint64]RelayedChain)
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
@@ -61,7 +61,7 @@ func (s *RouteTestSuite) TestStartListensOnChannel() {
 func (s *RouteTestSuite) TestReceiveMessageFails() {
 	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(1)
 	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(nil, fmt.Errorf("error"))
-	chains := make(map[uint8]RelayedChain)
+	chains := make(map[uint64]RelayedChain)
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
@@ -76,7 +76,7 @@ func (s *RouteTestSuite) TestReceiveMessageFails() {
 func (s *RouteTestSuite) TestAvoidWriteWithoutProposals() {
 	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(nil, nil)
 	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1))
-	chains := make(map[uint8]RelayedChain)
+	chains := make(map[uint64]RelayedChain)
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
@@ -95,7 +95,7 @@ func (s *RouteTestSuite) TestWriteFails() {
 	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(prop, nil)
 	s.mockRelayedChain.EXPECT().Write(props).Return(fmt.Errorf("error"))
 	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(1)
-	chains := make(map[uint8]RelayedChain)
+	chains := make(map[uint64]RelayedChain)
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
@@ -114,7 +114,7 @@ func (s *RouteTestSuite) TestWritesToChain() {
 	s.mockRelayedChain.EXPECT().ReceiveMessage(gomock.Any()).Return(prop, nil)
 	s.mockRelayedChain.EXPECT().Write(props).Return(nil)
 	s.mockRelayedChain.EXPECT().DomainID().Return(uint8(1)).Times(1)
-	chains := make(map[uint8]RelayedChain)
+	chains := make(map[uint64]RelayedChain)
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
@@ -130,7 +130,7 @@ func (s *RouteTestSuite) Test_Route_ChainDoesNotExist() {
 	props := make([]*proposal.Proposal, 1)
 	prop := &proposal.Proposal{}
 	props[0] = prop
-	chains := make(map[uint8]RelayedChain)
+	chains := make(map[uint64]RelayedChain)
 	chains[1] = s.mockRelayedChain
 	relayer := NewRelayer(
 		chains,
