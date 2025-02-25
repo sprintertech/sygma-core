@@ -27,7 +27,7 @@ type MessageTracker interface {
 	TrackMessages(msgs []*message.Message, status message.MessageStatus)
 }
 
-func NewRelayer(chains map[uint8]RelayedChain, messageTracker MessageTracker) *Relayer {
+func NewRelayer(chains map[uint64]RelayedChain, messageTracker MessageTracker) *Relayer {
 	return &Relayer{
 		relayedChains:  chains,
 		messageTracker: messageTracker,
@@ -35,7 +35,7 @@ func NewRelayer(chains map[uint8]RelayedChain, messageTracker MessageTracker) *R
 }
 
 type Relayer struct {
-	relayedChains  map[uint8]RelayedChain
+	relayedChains  map[uint64]RelayedChain
 	messageTracker MessageTracker
 }
 
@@ -66,7 +66,7 @@ func (r *Relayer) route(msgs []*message.Message) {
 	r.messageTracker.TrackMessages(msgs, message.PendingMessage)
 	destChain, ok := r.relayedChains[msgs[0].Destination]
 	if !ok {
-		log.Error().Uint8("domainID", msgs[0].Destination).Msgf("No chain registered for destination domain")
+		log.Error().Uint64("domainID", msgs[0].Destination).Msgf("No chain registered for destination domain")
 		return
 	}
 
