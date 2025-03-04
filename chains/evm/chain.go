@@ -33,20 +33,20 @@ type EVMChain struct {
 	executor       ProposalExecutor
 	messageHandler MessageHandler
 
-	domainID   uint8
+	domainID   uint64
 	startBlock *big.Int
 
 	logger zerolog.Logger
 }
 
-func NewEVMChain(listener EventListener, messageHandler MessageHandler, executor ProposalExecutor, domainID uint8, startBlock *big.Int) *EVMChain {
+func NewEVMChain(listener EventListener, messageHandler MessageHandler, executor ProposalExecutor, domainID uint64, startBlock *big.Int) *EVMChain {
 	return &EVMChain{
 		listener:       listener,
 		executor:       executor,
 		domainID:       domainID,
 		startBlock:     startBlock,
 		messageHandler: messageHandler,
-		logger:         log.With().Uint8("domainID", domainID).Logger(),
+		logger:         log.With().Uint64("domainID", domainID).Logger(),
 	}
 }
 
@@ -83,6 +83,6 @@ func (c *EVMChain) Write(props []*proposal.Proposal) error {
 	return nil
 }
 
-func (c *EVMChain) DomainID() uint8 {
+func (c *EVMChain) DomainID() uint64 {
 	return c.domainID
 }

@@ -23,7 +23,7 @@ func NewBlockStore(db KeyValueReaderWriter) *BlockStore {
 }
 
 // StoreBlock stores block number per domainID into blockstore
-func (bs *BlockStore) StoreBlock(block *big.Int, domainID uint8) error {
+func (bs *BlockStore) StoreBlock(block *big.Int, domainID uint64) error {
 	key := bytes.Buffer{}
 	keyS := fmt.Sprintf("chain:%d:block", domainID)
 	key.WriteString(keyS)
@@ -37,7 +37,7 @@ func (bs *BlockStore) StoreBlock(block *big.Int, domainID uint8) error {
 }
 
 // GetLastStoredBlock queries the blockstore and returns latest known block
-func (bs *BlockStore) GetLastStoredBlock(domainID uint8) (*big.Int, error) {
+func (bs *BlockStore) GetLastStoredBlock(domainID uint64) (*big.Int, error) {
 	key := bytes.Buffer{}
 	keyS := fmt.Sprintf("chain:%d:block", domainID)
 	key.WriteString(keyS)
@@ -56,7 +56,7 @@ func (bs *BlockStore) GetLastStoredBlock(domainID uint8) (*big.Int, error) {
 
 // GetStartBlock queries the blockstore for the latest known block. If the latest block is
 // greater than configured startBlock, then startBlock is replaced with the latest known block.
-func (bs *BlockStore) GetStartBlock(domainID uint8, startBlock *big.Int, latest bool, fresh bool) (*big.Int, error) {
+func (bs *BlockStore) GetStartBlock(domainID uint64, startBlock *big.Int, latest bool, fresh bool) (*big.Int, error) {
 	if latest {
 		return nil, nil
 	}
