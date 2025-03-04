@@ -23,11 +23,11 @@ type ChainConnection interface {
 }
 
 type BlockStorer interface {
-	StoreBlock(block *big.Int, domainID uint8) error
+	StoreBlock(block *big.Int, domainID uint64) error
 }
 
 type BlockDeltaMeter interface {
-	TrackBlockDelta(domainID uint8, head *big.Int, current *big.Int)
+	TrackBlockDelta(domainID uint64, head *big.Int, current *big.Int)
 }
 
 type SubstrateListener struct {
@@ -38,14 +38,14 @@ type SubstrateListener struct {
 
 	blockRetryInterval time.Duration
 	blockInterval      *big.Int
-	domainID           uint8
+	domainID           uint64
 
 	log zerolog.Logger
 }
 
-func NewSubstrateListener(connection ChainConnection, eventHandlers []EventHandler, blockstore BlockStorer, metrics BlockDeltaMeter, domainID uint8, blockRetryInterval time.Duration, blockInterval *big.Int) *SubstrateListener {
+func NewSubstrateListener(connection ChainConnection, eventHandlers []EventHandler, blockstore BlockStorer, metrics BlockDeltaMeter, domainID uint64, blockRetryInterval time.Duration, blockInterval *big.Int) *SubstrateListener {
 	return &SubstrateListener{
-		log:                log.With().Uint8("domainID", domainID).Logger(),
+		log:                log.With().Uint64("domainID", domainID).Logger(),
 		domainID:           domainID,
 		conn:               connection,
 		blockstore:         blockstore,

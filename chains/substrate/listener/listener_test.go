@@ -21,7 +21,7 @@ type ListenerTestSuite struct {
 	mockEventHandler    *mock.MockEventHandler
 	mockBlockStorer     *mock.MockBlockStorer
 	mockBlockDeltaMeter *mock.MockBlockDeltaMeter
-	domainID            uint8
+	domainID            uint64
 }
 
 func TestRunTestSuite(t *testing.T) {

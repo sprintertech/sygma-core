@@ -5,6 +5,7 @@
 //
 //	mockgen -destination=./mock/client.go -source=./chains/evm/client/client.go -package mock
 //
+
 // Package mock is a generated GoMock package.
 package mock
 
@@ -23,6 +24,7 @@ import (
 type MockContractCaller struct {
 	ctrl     *gomock.Controller
 	recorder *MockContractCallerMockRecorder
+	isgomock struct{}
 }
 
 // MockContractCallerMockRecorder is the mock recorder for MockContractCaller.
@@ -76,6 +78,7 @@ func (mr *MockContractCallerMockRecorder) CodeAt(ctx, contract, blockNumber any)
 type MockTransactionDispatcher struct {
 	ctrl     *gomock.Controller
 	recorder *MockTransactionDispatcherMockRecorder
+	isgomock struct{}
 }
 
 // MockTransactionDispatcherMockRecorder is the mock recorder for MockTransactionDispatcher.
@@ -227,6 +230,7 @@ func (mr *MockTransactionDispatcherMockRecorder) WaitAndReturnTxReceipt(h any) *
 type MockClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockClientMockRecorder
+	isgomock struct{}
 }
 
 // MockClientMockRecorder is the mock recorder for MockClient.
@@ -408,6 +412,7 @@ func (mr *MockClientMockRecorder) WaitAndReturnTxReceipt(h any) *gomock.Call {
 type MockSigner struct {
 	ctrl     *gomock.Controller
 	recorder *MockSignerMockRecorder
+	isgomock struct{}
 }
 
 // MockSignerMockRecorder is the mock recorder for MockSigner.
@@ -460,6 +465,7 @@ func (mr *MockSignerMockRecorder) Sign(digestHash any) *gomock.Call {
 type MockCommonTransaction struct {
 	ctrl     *gomock.Controller
 	recorder *MockCommonTransactionMockRecorder
+	isgomock struct{}
 }
 
 // MockCommonTransactionMockRecorder is the mock recorder for MockCommonTransaction.

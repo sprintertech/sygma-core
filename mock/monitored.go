@@ -5,6 +5,7 @@
 //
 //	mockgen -source=chains/evm/transactor/monitored/monitored.go -destination=./mock/monitored.go -package mock
 //
+
 // Package mock is a generated GoMock package.
 package mock
 
@@ -19,6 +20,7 @@ import (
 type MockGasPricer struct {
 	ctrl     *gomock.Controller
 	recorder *MockGasPricerMockRecorder
+	isgomock struct{}
 }
 
 // MockGasPricerMockRecorder is the mock recorder for MockGasPricer.
@@ -57,6 +59,7 @@ func (mr *MockGasPricerMockRecorder) GasPrice(priority any) *gomock.Call {
 type MockGasTracker struct {
 	ctrl     *gomock.Controller
 	recorder *MockGasTrackerMockRecorder
+	isgomock struct{}
 }
 
 // MockGasTrackerMockRecorder is the mock recorder for MockGasTracker.
@@ -77,7 +80,7 @@ func (m *MockGasTracker) EXPECT() *MockGasTrackerMockRecorder {
 }
 
 // TrackGasUsage mocks base method.
-func (m *MockGasTracker) TrackGasUsage(domainID uint8, gasUsed uint64, gasPrice *big.Int) {
+func (m *MockGasTracker) TrackGasUsage(domainID, gasUsed uint64, gasPrice *big.Int) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "TrackGasUsage", domainID, gasUsed, gasPrice)
 }

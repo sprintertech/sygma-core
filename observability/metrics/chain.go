@@ -13,10 +13,10 @@ type ChainMetrics struct {
 	opts metric.MeasurementOption
 
 	blockDeltaGauge     metric.Int64ObservableGauge
-	blockDeltaMap       map[uint8]*big.Int
-	processedBlockMap   map[uint8]*big.Int
+	blockDeltaMap       map[uint64]*big.Int
+	processedBlockMap   map[uint64]*big.Int
 	processedBlockGauge metric.Int64ObservableGauge
-	chainHeadMap        map[uint8]*big.Int
+	chainHeadMap        map[uint64]*big.Int
 	chainHeadGauge      metric.Int64ObservableGauge
 	lock                sync.Mutex
 
@@ -26,7 +26,7 @@ type ChainMetrics struct {
 
 // NewChainMetrics initializes metrics that provide insight into chain processing and activity
 func NewChainMetrics(ctx context.Context, meter metric.Meter, opts metric.MeasurementOption) (*ChainMetrics, error) {
-	blockDeltaMap := make(map[uint8]*big.Int)
+	blockDeltaMap := make(map[uint64]*big.Int)
 	blockDeltaGauge, err := meter.Int64ObservableGauge(
 		"relayer.BlockDelta",
 		metric.WithInt64Callback(func(context context.Context, result metric.Int64Observer) error {
@@ -44,7 +44,7 @@ func NewChainMetrics(ctx context.Context, meter metric.Meter, opts metric.Measur
 		return nil, err
 	}
 
-	chainHeadMap := make(map[uint8]*big.Int)
+	chainHeadMap := make(map[uint64]*big.Int)
 	chainHeadGauge, err := meter.Int64ObservableGauge(
 		"relayer.ChainHead",
 		metric.WithInt64Callback(func(context context.Context, result metric.Int64Observer) error {
@@ -62,7 +62,7 @@ func NewChainMetrics(ctx context.Context, meter metric.Meter, opts metric.Measur
 		return nil, err
 	}
 
-	processedBlockMap := make(map[uint8]*big.Int)
+	processedBlockMap := make(map[uint64]*big.Int)
 	processedBlockGauge, err := meter.Int64ObservableGauge(
 		"relayer.ProcessedBlocks",
 		metric.WithInt64Callback(func(context context.Context, result metric.Int64Observer) error {
@@ -110,7 +110,7 @@ func NewChainMetrics(ctx context.Context, meter metric.Meter, opts metric.Measur
 	}, nil
 }
 
-func (m *ChainMetrics) TrackBlockDelta(domainID uint8, head *big.Int, current *big.Int) {
+func (m *ChainMetrics) TrackBlockDelta(domainID uint64, head *big.Int, current *big.Int) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -119,7 +119,7 @@ func (m *ChainMetrics) TrackBlockDelta(domainID uint8, head *big.Int, current *b
 	m.chainHeadMap[domainID] = new(big.Int).Set(head)
 }
 
-func (m *ChainMetrics) TrackGasUsage(domainID uint8, gasUsed uint64, gasPrice *big.Int) {
+func (m *ChainMetrics) TrackGasUsage(domainID uint64, gasUsed uint64, gasPrice *big.Int) {
 	m.gasPriceHistogram.Record(
 		context.Background(),
 		gasPrice.Int64(),

@@ -21,11 +21,11 @@ type ChainClient interface {
 }
 
 type BlockDeltaMeter interface {
-	TrackBlockDelta(domainID uint8, head *big.Int, current *big.Int)
+	TrackBlockDelta(domainID uint64, head *big.Int, current *big.Int)
 }
 
 type BlockStorer interface {
-	StoreBlock(block *big.Int, domainID uint8) error
+	StoreBlock(block *big.Int, domainID uint64) error
 }
 
 type EVMListener struct {
@@ -34,7 +34,7 @@ type EVMListener struct {
 	metrics       BlockDeltaMeter
 	blockstore    BlockStorer
 
-	domainID           uint8
+	domainID           uint64
 	blockRetryInterval time.Duration
 	blockConfirmations *big.Int
 	blockInterval      *big.Int
@@ -49,11 +49,11 @@ func NewEVMListener(
 	eventHandlers []EventHandler,
 	blockstore BlockStorer,
 	metrics BlockDeltaMeter,
-	domainID uint8,
+	domainID uint64,
 	blockRetryInterval time.Duration,
 	blockConfirmations *big.Int,
 	blockInterval *big.Int) *EVMListener {
-	logger := log.With().Uint8("domainID", domainID).Logger()
+	logger := log.With().Uint64("domainID", domainID).Logger()
 	return &EVMListener{
 		log:                logger,
 		client:             client,

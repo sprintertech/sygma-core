@@ -5,6 +5,7 @@
 //
 //	mockgen -source=./chains/evm/listener/listener.go -destination=./mock/evmListener.go -package mock
 //
+
 // Package mock is a generated GoMock package.
 package mock
 
@@ -19,6 +20,7 @@ import (
 type MockEventHandler struct {
 	ctrl     *gomock.Controller
 	recorder *MockEventHandlerMockRecorder
+	isgomock struct{}
 }
 
 // MockEventHandlerMockRecorder is the mock recorder for MockEventHandler.
@@ -56,6 +58,7 @@ func (mr *MockEventHandlerMockRecorder) HandleEvents(startBlock, endBlock any) *
 type MockChainClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockChainClientMockRecorder
+	isgomock struct{}
 }
 
 // MockChainClientMockRecorder is the mock recorder for MockChainClient.
@@ -94,6 +97,7 @@ func (mr *MockChainClientMockRecorder) LatestBlock() *gomock.Call {
 type MockBlockDeltaMeter struct {
 	ctrl     *gomock.Controller
 	recorder *MockBlockDeltaMeterMockRecorder
+	isgomock struct{}
 }
 
 // MockBlockDeltaMeterMockRecorder is the mock recorder for MockBlockDeltaMeter.
@@ -114,7 +118,7 @@ func (m *MockBlockDeltaMeter) EXPECT() *MockBlockDeltaMeterMockRecorder {
 }
 
 // TrackBlockDelta mocks base method.
-func (m *MockBlockDeltaMeter) TrackBlockDelta(domainID uint8, head, current *big.Int) {
+func (m *MockBlockDeltaMeter) TrackBlockDelta(domainID uint64, head, current *big.Int) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "TrackBlockDelta", domainID, head, current)
 }
@@ -129,6 +133,7 @@ func (mr *MockBlockDeltaMeterMockRecorder) TrackBlockDelta(domainID, head, curre
 type MockBlockStorer struct {
 	ctrl     *gomock.Controller
 	recorder *MockBlockStorerMockRecorder
+	isgomock struct{}
 }
 
 // MockBlockStorerMockRecorder is the mock recorder for MockBlockStorer.
@@ -149,7 +154,7 @@ func (m *MockBlockStorer) EXPECT() *MockBlockStorerMockRecorder {
 }
 
 // StoreBlock mocks base method.
-func (m *MockBlockStorer) StoreBlock(block *big.Int, domainID uint8) error {
+func (m *MockBlockStorer) StoreBlock(block *big.Int, domainID uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StoreBlock", block, domainID)
 	ret0, _ := ret[0].(error)

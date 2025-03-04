@@ -5,6 +5,7 @@
 //
 //	mockgen -destination=./mock/gas.go -source=./chains/evm/transactor/gas/gas-pricer.go -package mock
 //
+
 // Package mock is a generated GoMock package.
 package mock
 
@@ -20,6 +21,7 @@ import (
 type MockLondonGasClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockLondonGasClientMockRecorder
+	isgomock struct{}
 }
 
 // MockLondonGasClientMockRecorder is the mock recorder for MockLondonGasClient.
@@ -88,6 +90,7 @@ func (mr *MockLondonGasClientMockRecorder) SuggestGasTipCap(ctx any) *gomock.Cal
 type MockGasPriceClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockGasPriceClientMockRecorder
+	isgomock struct{}
 }
 
 // MockGasPriceClientMockRecorder is the mock recorder for MockGasPriceClient.

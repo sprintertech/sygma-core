@@ -5,6 +5,7 @@
 //
 //	mockgen -destination=./mock/substrateListener.go -package mock github.com/sygmaprotocol/sygma-core/chains/substrate/listener ChainConnection
 //
+
 // Package mock is a generated GoMock package.
 package mock
 
@@ -19,6 +20,7 @@ import (
 type MockChainConnection struct {
 	ctrl     *gomock.Controller
 	recorder *MockChainConnectionMockRecorder
+	isgomock struct{}
 }
 
 // MockChainConnectionMockRecorder is the mock recorder for MockChainConnection.
@@ -39,18 +41,18 @@ func (m *MockChainConnection) EXPECT() *MockChainConnectionMockRecorder {
 }
 
 // GetBlock mocks base method.
-func (m *MockChainConnection) GetBlock(arg0 types.Hash) (*types.SignedBlock, error) {
+func (m *MockChainConnection) GetBlock(blockHash types.Hash) (*types.SignedBlock, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBlock", arg0)
+	ret := m.ctrl.Call(m, "GetBlock", blockHash)
 	ret0, _ := ret[0].(*types.SignedBlock)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetBlock indicates an expected call of GetBlock.
-func (mr *MockChainConnectionMockRecorder) GetBlock(arg0 any) *gomock.Call {
+func (mr *MockChainConnectionMockRecorder) GetBlock(blockHash any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlock", reflect.TypeOf((*MockChainConnection)(nil).GetBlock), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlock", reflect.TypeOf((*MockChainConnection)(nil).GetBlock), blockHash)
 }
 
 // GetFinalizedHead mocks base method.

@@ -21,7 +21,7 @@ type GasPricer interface {
 }
 
 type GasTracker interface {
-	TrackGasUsage(domainID uint8, gasUsed uint64, gasPrice *big.Int)
+	TrackGasUsage(domainID uint64, gasUsed uint64, gasPrice *big.Int)
 }
 
 type RawTx struct {
@@ -49,7 +49,7 @@ func (tx *RawTx) GasPrice() *big.Int {
 }
 
 type MonitoredTransactor struct {
-	domainID uint8
+	domainID uint64
 	log      zerolog.Logger
 
 	txFabric       transaction.TxFabric
@@ -71,7 +71,7 @@ type MonitoredTransactor struct {
 // Gas price is increased by increasePercentage param which
 // is a percentage value with which old gas price should be increased (e.g 15)
 func NewMonitoredTransactor(
-	domainID uint8,
+	domainID uint64,
 	txFabric transaction.TxFabric,
 	gasPriceClient GasPricer,
 	gasTracker GasTracker,
@@ -81,7 +81,7 @@ func NewMonitoredTransactor(
 ) *MonitoredTransactor {
 	return &MonitoredTransactor{
 		domainID:           domainID,
-		log:                log.With().Uint8("domainID", domainID).Logger(),
+		log:                log.With().Uint64("domainID", domainID).Logger(),
 		client:             client,
 		gasPriceClient:     gasPriceClient,
 		gasTracker:         gasTracker,
