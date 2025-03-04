@@ -20,7 +20,7 @@ type RelayedChain interface {
 	// Write submits proposals on-chain.
 	// If multiple proposals submitted they are expected to be able to be batched.
 	Write(proposals []*proposal.Proposal) error
-	DomainID() uint8
+	DomainID() uint64
 }
 
 type MessageTracker interface {
@@ -70,7 +70,7 @@ func (r *Relayer) route(msgs []*message.Message) {
 		return
 	}
 
-	log := log.With().Uint8("domainID", destChain.DomainID()).Str("messageID", msgs[0].ID).Logger()
+	log := log.With().Uint64("domainID", destChain.DomainID()).Str("messageID", msgs[0].ID).Logger()
 	props := make([]*proposal.Proposal, 0)
 	for _, m := range msgs {
 		log.Debug().Msgf("Sending message")

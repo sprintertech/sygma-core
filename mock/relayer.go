@@ -43,10 +43,10 @@ func (m *MockRelayedChain) EXPECT() *MockRelayedChainMockRecorder {
 }
 
 // DomainID mocks base method.
-func (m *MockRelayedChain) DomainID() uint8 {
+func (m *MockRelayedChain) DomainID() uint64 {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DomainID")
-	ret0, _ := ret[0].(uint8)
+	ret0, _ := ret[0].(uint64)
 	return ret0
 }
 
