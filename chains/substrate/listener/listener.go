@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types/block"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -19,7 +20,7 @@ type EventHandler interface {
 
 type ChainConnection interface {
 	GetFinalizedHead() (types.Hash, error)
-	GetBlock(blockHash types.Hash) (*types.SignedBlock, error)
+	GetBlock(blockHash types.Hash) (*block.SignedBlock, error)
 }
 
 type BlockStorer interface {

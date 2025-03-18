@@ -5,6 +5,7 @@
 //
 //	mockgen -source=./relayer/message/handler.go -destination=./mock/message.go -package mock
 //
+
 // Package mock is a generated GoMock package.
 package mock
 
@@ -20,6 +21,7 @@ import (
 type MockHandler struct {
 	ctrl     *gomock.Controller
 	recorder *MockHandlerMockRecorder
+	isgomock struct{}
 }
 
 // MockHandlerMockRecorder is the mock recorder for MockHandler.
