@@ -15,6 +15,7 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/extrinsic"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types/extrinsic/extensions"
 	"github.com/rs/zerolog/log"
 	"github.com/sygmaprotocol/sygma-core/chains/substrate/connection"
 	"github.com/sygmaprotocol/sygma-core/chains/substrate/events"
@@ -79,6 +80,7 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 		extrinsic.WithSpecVersion(rv.SpecVersion),
 		extrinsic.WithTip(types.NewUCompactFromUInt(c.tip)),
 		extrinsic.WithTransactionVersion(rv.TransactionVersion),
+		extrinsic.WithMetadataMode(extensions.CheckMetadataModeDisabled, extensions.CheckMetadataHash{Hash: types.NewEmptyOption[types.H256]()}),
 	)
 	if err != nil {
 		return types.Hash{}, nil, fmt.Errorf("submission of extrinsic failed: %w", err)
