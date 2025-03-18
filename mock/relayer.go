@@ -5,6 +5,7 @@
 //
 //	mockgen -destination=./mock/relayer.go -source=./relayer/relayer.go -package mock
 //
+
 // Package mock is a generated GoMock package.
 package mock
 
@@ -21,6 +22,7 @@ import (
 type MockRelayedChain struct {
 	ctrl     *gomock.Controller
 	recorder *MockRelayedChainMockRecorder
+	isgomock struct{}
 }
 
 // MockRelayedChainMockRecorder is the mock recorder for MockRelayedChain.
@@ -99,6 +101,7 @@ func (mr *MockRelayedChainMockRecorder) Write(proposals any) *gomock.Call {
 type MockMessageTracker struct {
 	ctrl     *gomock.Controller
 	recorder *MockMessageTrackerMockRecorder
+	isgomock struct{}
 }
 
 // MockMessageTrackerMockRecorder is the mock recorder for MockMessageTracker.

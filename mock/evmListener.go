@@ -5,6 +5,7 @@
 //
 //	mockgen -source=./chains/evm/listener/listener.go -destination=./mock/evmListener.go -package mock
 //
+
 // Package mock is a generated GoMock package.
 package mock
 
@@ -19,6 +20,7 @@ import (
 type MockEventHandler struct {
 	ctrl     *gomock.Controller
 	recorder *MockEventHandlerMockRecorder
+	isgomock struct{}
 }
 
 // MockEventHandlerMockRecorder is the mock recorder for MockEventHandler.
@@ -56,6 +58,7 @@ func (mr *MockEventHandlerMockRecorder) HandleEvents(startBlock, endBlock any) *
 type MockChainClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockChainClientMockRecorder
+	isgomock struct{}
 }
 
 // MockChainClientMockRecorder is the mock recorder for MockChainClient.
@@ -94,6 +97,7 @@ func (mr *MockChainClientMockRecorder) LatestBlock() *gomock.Call {
 type MockBlockDeltaMeter struct {
 	ctrl     *gomock.Controller
 	recorder *MockBlockDeltaMeterMockRecorder
+	isgomock struct{}
 }
 
 // MockBlockDeltaMeterMockRecorder is the mock recorder for MockBlockDeltaMeter.
@@ -129,6 +133,7 @@ func (mr *MockBlockDeltaMeterMockRecorder) TrackBlockDelta(domainID, head, curre
 type MockBlockStorer struct {
 	ctrl     *gomock.Controller
 	recorder *MockBlockStorerMockRecorder
+	isgomock struct{}
 }
 
 // MockBlockStorerMockRecorder is the mock recorder for MockBlockStorer.

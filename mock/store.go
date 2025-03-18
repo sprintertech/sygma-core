@@ -5,6 +5,7 @@
 //
 //	mockgen -source=./store/store.go -destination=./mock/store.go -package mock
 //
+
 // Package mock is a generated GoMock package.
 package mock
 
@@ -18,6 +19,7 @@ import (
 type MockKeyValueReaderWriter struct {
 	ctrl     *gomock.Controller
 	recorder *MockKeyValueReaderWriterMockRecorder
+	isgomock struct{}
 }
 
 // MockKeyValueReaderWriterMockRecorder is the mock recorder for MockKeyValueReaderWriter.
@@ -70,6 +72,7 @@ func (mr *MockKeyValueReaderWriterMockRecorder) SetByKey(key, value any) *gomock
 type MockKeyValueReader struct {
 	ctrl     *gomock.Controller
 	recorder *MockKeyValueReaderMockRecorder
+	isgomock struct{}
 }
 
 // MockKeyValueReaderMockRecorder is the mock recorder for MockKeyValueReader.
@@ -108,6 +111,7 @@ func (mr *MockKeyValueReaderMockRecorder) GetByKey(key any) *gomock.Call {
 type MockKeyValueWriter struct {
 	ctrl     *gomock.Controller
 	recorder *MockKeyValueWriterMockRecorder
+	isgomock struct{}
 }
 
 // MockKeyValueWriterMockRecorder is the mock recorder for MockKeyValueWriter.

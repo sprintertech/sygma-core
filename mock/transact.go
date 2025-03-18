@@ -5,6 +5,7 @@
 //
 //	mockgen -source=chains/evm/transactor/transact.go -destination=./mock/transact.go -package mock
 //
+
 // Package mock is a generated GoMock package.
 package mock
 
@@ -20,6 +21,7 @@ import (
 type MockTransactor struct {
 	ctrl     *gomock.Controller
 	recorder *MockTransactorMockRecorder
+	isgomock struct{}
 }
 
 // MockTransactorMockRecorder is the mock recorder for MockTransactor.
