@@ -81,6 +81,7 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 		extrinsic.WithTip(types.NewUCompactFromUInt(c.tip)),
 		extrinsic.WithTransactionVersion(rv.TransactionVersion),
 		extrinsic.WithMetadataMode(extensions.CheckMetadataModeDisabled, extensions.CheckMetadataHash{Hash: types.NewEmptyOption[types.H256]()}),
+		extrinsic.WithAssetID(types.NewEmptyOption[types.AssetID]()),
 	)
 	if err != nil {
 		return types.Hash{}, nil, fmt.Errorf("submission of extrinsic failed: %w", err)
