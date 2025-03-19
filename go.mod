@@ -89,4 +89,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/centrifuge/go-substrate-rpc-client => github.com/tolak/go-substrate-rpc-client v0.0.0-20250319114649-4e9cb7e9c67f
+replace github.com/centrifuge/go-substrate-rpc-client/v4 => github.com/tolak/go-substrate-rpc-client/v4 v4.0.0-20250319114649-4e9cb7e9c67f
