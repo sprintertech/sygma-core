@@ -7,11 +7,13 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/centrifuge/go-substrate-rpc-client/v4/rpc/author"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/hash"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/extrinsic"
@@ -19,6 +21,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/sygmaprotocol/sygma-core/chains/substrate/connection"
 	"github.com/sygmaprotocol/sygma-core/chains/substrate/events"
+	"encoding/hex"
 )
 
 type SubstrateClient struct {
@@ -74,14 +77,14 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 	sub, err := c.submitAndWatchExtrinsic(
 		&ext,
 		&meta,
-		extrinsic.WithEra(types.ExtrinsicEra{IsImmortalEra: false}, c.Conn.GenesisHash),
-		extrinsic.WithGenesisHash(c.Conn.GenesisHash),
+		extrinsic.WithEra(types.ExtrinsicEra{IsImmortalEra: true}, c.Conn.GenesisHash),
 		extrinsic.WithNonce(types.NewUCompactFromUInt(uint64(nonce))),
-		extrinsic.WithSpecVersion(rv.SpecVersion),
 		extrinsic.WithTip(types.NewUCompactFromUInt(c.tip)),
+		extrinsic.WithMetadataMode(extensions.CheckMetadataModeDisabled),
+		extrinsic.WithSpecVersion(rv.SpecVersion),
 		extrinsic.WithTransactionVersion(rv.TransactionVersion),
-		extrinsic.WithMetadataMode(extensions.CheckMetadataModeDisabled, extensions.CheckMetadataHash{Hash: types.NewEmptyOption[types.H256]()}),
-		extrinsic.WithAssetID(types.NewEmptyOption[types.AssetID]()),
+		extrinsic.WithGenesisHash(c.Conn.GenesisHash),
+		extrinsic.WithMetadataHash(extensions.CheckMetadataHash{Hash: types.NewEmptyOption[types.H256]()}),
 	)
 	if err != nil {
 		return types.Hash{}, nil, fmt.Errorf("submission of extrinsic failed: %w", err)
@@ -92,10 +95,27 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 		return types.Hash{}, nil, err
 	}
 
-	hash, err := types.NewHashFromHexString(enc)
-	if err != nil {
-		return types.Hash{}, nil, err
+	// Decode the hex string to get the raw extrinsic bytes
+	var extBytes []byte
+	if strings.HasPrefix(enc, "0x") {
+		extBytes, err = hex.DecodeString(enc[2:])
+	} else {
+		extBytes, err = hex.DecodeString(enc)
 	}
+	if err != nil {
+		return types.Hash{}, nil, fmt.Errorf("failed to decode extrinsic hex: %w", err)
+	}
+
+	// Create Blake2b-256 hash of the extrinsic bytes
+	hasher, err := hash.NewBlake2b256(nil)
+	if err != nil {
+		return types.Hash{}, nil, fmt.Errorf("failed to create hasher: %w", err)
+	}
+	hasher.Write(extBytes)
+	hashBytes := hasher.Sum(nil)
+
+	// Create a new Hash from the hash bytes
+	hash := types.NewHash(hashBytes)
 
 	log.Info().Str("extrinsic", hash.Hex()).Msgf("Extrinsic call submitted... method %s, sender %s, nonce %d", method, c.key.Address, nonce)
 	c.nonce = nonce + 1
