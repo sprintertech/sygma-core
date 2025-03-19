@@ -1,6 +1,8 @@
 module github.com/sygmaprotocol/sygma-core
 
-go 1.19
+go 1.21
+
+toolchain go1.23.6
 
 require (
 	github.com/centrifuge/go-substrate-rpc-client/v4 v4.2.2-0.20240919131012-e3b938563803
@@ -86,3 +88,5 @@ require (
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/centrifuge/go-substrate-rpc-client => github.com/tolak/go-substrate-rpc-client v0.0.0-20250319114649-4e9cb7e9c67f
