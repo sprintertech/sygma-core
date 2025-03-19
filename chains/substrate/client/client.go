@@ -11,17 +11,17 @@ import (
 	"sync"
 	"time"
 
+	"encoding/hex"
+
+	"github.com/centrifuge/go-substrate-rpc-client/v4/hash"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/rpc/author"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/hash"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/extrinsic"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/extrinsic/extensions"
 	"github.com/rs/zerolog/log"
 	"github.com/sygmaprotocol/sygma-core/chains/substrate/connection"
-	"github.com/sygmaprotocol/sygma-core/chains/substrate/events"
-	"encoding/hex"
 )
 
 type SubstrateClient struct {
@@ -124,7 +124,6 @@ func (c *SubstrateClient) Transact(method string, args ...interface{}) (types.Ha
 }
 
 func (c *SubstrateClient) TrackExtrinsic(extHash types.Hash, sub *author.ExtrinsicStatusSubscription) error {
-	meta := c.Conn.GetMetadata()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Minute*10))
 	defer sub.Unsubscribe()
 	defer cancel()
@@ -136,9 +135,14 @@ func (c *SubstrateClient) TrackExtrinsic(extHash types.Hash, sub *author.Extrins
 				if status.IsInBlock {
 					log.Debug().Str("extrinsic", extHash.Hex()).Msgf("Extrinsic in block with hash: %#x", status.AsInBlock)
 				}
+
+				if status.IsDropped || status.IsRetracted || status.IsInvalid {
+					return fmt.Errorf("extrinsic dropped")
+				}
+
 				if status.IsFinalized {
 					log.Info().Str("extrinsic", extHash.Hex()).Msgf("Extrinsic is finalized in block with hash: %#x", status.AsFinalized)
-					return c.checkExtrinsicSuccess(extHash, &meta, status.AsFinalized)
+					return nil
 				}
 			}
 		case <-ctx.Done():
@@ -188,44 +192,6 @@ func (c *SubstrateClient) submitAndWatchExtrinsic(
 	}
 
 	return sub, nil
-}
-
-func (c *SubstrateClient) checkExtrinsicSuccess(extHash types.Hash, meta *types.Metadata, blockHash types.Hash) error {
-	block, err := c.Conn.Chain.GetBlock(blockHash)
-	if err != nil {
-		return err
-	}
-
-	evts, err := c.Conn.GetBlockEvents(blockHash)
-	if err != nil {
-		return err
-	}
-
-	for _, event := range evts {
-		index := event.Phase.AsApplyExtrinsic
-
-		hexHash := (block.Block.Extrinsics[index])
-		hash, err := types.NewHashFromHexString(hexHash)
-		if err != nil {
-			return err
-		}
-
-		if extHash != hash {
-			continue
-		}
-
-		if event.Name == events.ExtrinsicFailedEvent {
-			return fmt.Errorf("extrinsic failed")
-		}
-		if event.Name == events.FailedHandlerExecutionEvent {
-			return fmt.Errorf("extrinsic failed with failed handler execution")
-		}
-		if event.Name == events.ExtrinsicSuccessEvent {
-			return nil
-		}
-	}
-
-	return fmt.Errorf("no event found")
 }
 
 func (c *SubstrateClient) LatestBlock() (*big.Int, error) {
